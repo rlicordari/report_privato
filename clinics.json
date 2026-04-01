@@ -1,70 +1,87 @@
 [
   {
     "name": "Parisi-Sottile",
-    "retention_pct": 0
+    "retention_pct": 0,
+    "ritenuta_acconto": false
   },
   {
     "name": "Policenter Leonardo",
-    "retention_pct": 25
+    "retention_pct": 25,
+    "ritenuta_acconto": true
   },
   {
     "name": "aDoc",
-    "retention_pct": 20
+    "retention_pct": 20,
+    "ritenuta_acconto": true
   },
   {
     "name": "Cavour ME",
-    "retention_pct": 20
+    "retention_pct": 20,
+    "ritenuta_acconto": true
   },
   {
     "name": "Panacea RC",
-    "retention_pct": 25
+    "retention_pct": 25,
+    "ritenuta_acconto": true
   },
   {
     "name": "Selene BG",
-    "retention_pct": 30
+    "retention_pct": 30,
+    "ritenuta_acconto": true
   },
   {
     "name": "Furci",
-    "retention_pct": 25
+    "retention_pct": 25,
+    "ritenuta_acconto": true
   },
   {
     "name": "Giallanza Torrenova",
-    "retention_pct": 0
+    "retention_pct": 0,
+    "ritenuta_acconto": false
   },
   {
     "name": "Tortorici",
-    "retention_pct": 25
+    "retention_pct": 25,
+    "ritenuta_acconto": true
   },
   {
     "name": "Panacea BPG",
-    "retention_pct": 30
+    "retention_pct": 30,
+    "ritenuta_acconto": true
   },
   {
     "name": "Giarre",
-    "retention_pct": 25
+    "retention_pct": 25,
+    "ritenuta_acconto": true
   },
   {
     "name": "Pistunina",
-    "retention_pct": 30
+    "retention_pct": 30,
+    "ritenuta_acconto": true
   },
   {
     "name": "Orlandino",
-    "retention_pct": 25
+    "retention_pct": 25,
+    "ritenuta_acconto": true
   },
   {
     "name": "Galeno Milazzo",
-    "retention_pct": 30
+    "retention_pct": 30,
+    "ritenuta_acconto": true
   },
   {
     "name": "Sinergo ME",
-    "retention_pct": 30
+    "retention_pct": 30,
+    "ritenuta_acconto": true
   },
   {
     "name": "Pietro e Paolo",
-    "retention_pct": 30
+    "retention_pct": 30,
+    "ritenuta_acconto": true
   },
   {
     "name": "Patti",
-    "retention_pct": 20
+    "retention_pct": 20,
+    "ritenuta_acconto": false
   }
 ]
