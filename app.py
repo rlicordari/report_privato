@@ -85,7 +85,7 @@ def get_clinics() -> list[dict]:
 def get_visits() -> pd.DataFrame:
     content, _ = gh_read(VISITS_FILE)
     if content and content.strip():
-        df = pd.read_csv(io.BytesIO(content), parse_dates=["data"])
+        df = pd.read_csv(io.BytesIO(content))
         return df
     return EMPTY_VISITS.copy()
 
@@ -189,7 +189,11 @@ def page_report():
         st.info("Nessun dato. Aggiungi prima le visite.")
         return
 
-    df["data"] = pd.to_datetime(df["data"])
+    df["data"] = pd.to_datetime(df["data"], errors="coerce")
+    df = df.dropna(subset=["data"])
+    if df.empty:
+        st.info(f"Nessuna visita registrata per **{poli}** nel mese di **{month_name} {year}**.")
+        return
     mask     = (df["data"].dt.year == year) & (df["data"].dt.month == month) & (df["poliambulatorio"] == poli)
     filtered = df[mask].copy()
 
