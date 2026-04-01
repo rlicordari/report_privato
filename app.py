@@ -350,6 +350,94 @@ def page_poliambulatori():
         st.success(f"✅ {len(new_clinics)} poliambulatori salvati!")
         st.rerun()
 
+# ─── HELPER: TABELLA HTML CON PRIMA COLONNA E HEADER FISSI ──────────────────
+
+def _render_sticky_table(rows: list[dict]):
+    if not rows:
+        return
+    cols = list(rows[0].keys())
+    is_last = [False] * (len(rows) - 1) + [True]   # ultima riga = TOTALE
+
+    header_cells = "".join(f"<th>{c}</th>" for c in cols)
+
+    body_rows = ""
+    for row, last in zip(rows, is_last):
+        style = " class='totale'" if last else ""
+        cells = "".join(f"<td>{row[c]}</td>" for c in cols)
+        body_rows += f"<tr{style}>{cells}</tr>"
+
+    html = f"""
+<style>
+  .gt-wrap {{
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    max-height: 70vh;
+    overflow-y: auto;
+  }}
+  .gt-wrap table {{
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: max-content;
+  }}
+  .gt-wrap th, .gt-wrap td {{
+    border: 1px solid #d0d0d0;
+    padding: 6px 10px;
+    white-space: nowrap;
+    text-align: right;
+  }}
+  /* Prima colonna: sticky a sinistra */
+  .gt-wrap th:first-child,
+  .gt-wrap td:first-child {{
+    position: sticky;
+    left: 0;
+    text-align: left;
+    z-index: 2;
+    background: #ffffff;
+    border-right: 2px solid #aaa;
+    min-width: 130px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }}
+  /* Header: sticky in alto */
+  .gt-wrap thead th {{
+    position: sticky;
+    top: 0;
+    background: #f0f2f6;
+    z-index: 3;
+  }}
+  .gt-wrap thead th:first-child {{
+    z-index: 4;
+    background: #e8eaf0;
+  }}
+  /* Riga totale */
+  .gt-wrap tr.totale td {{
+    font-weight: bold;
+    background: #f8f9fc;
+    border-top: 2px solid #aaa;
+  }}
+  .gt-wrap tr.totale td:first-child {{
+    background: #f0f2f6;
+  }}
+  /* Righe alternate */
+  .gt-wrap tbody tr:not(.totale):nth-child(even) td {{
+    background: #fafafa;
+  }}
+  .gt-wrap tbody tr:not(.totale):nth-child(even) td:first-child {{
+    background: #f5f5f5;
+  }}
+</style>
+<div class="gt-wrap">
+  <table>
+    <thead><tr>{header_cells}</tr></thead>
+    <tbody>{body_rows}</tbody>
+  </table>
+</div>
+"""
+    st.markdown(html, unsafe_allow_html=True)
+
+
 # ─── PAGE: REPORT GLOBALE ────────────────────────────────────────────────────
 
 def page_report_globale():
@@ -455,23 +543,8 @@ def page_report_globale():
         "Pagata":      "",
     })
 
-    display = pd.DataFrame(table_rows)
-
     st.markdown(f"### {month_name} {year}")
-    st.dataframe(
-        display,
-        use_container_width=True,
-        hide_index=True,
-        column_config={
-            "Ambulatorio": st.column_config.TextColumn(width="medium"),
-            "N.":          st.column_config.TextColumn(width="small"),
-            "POS €":       st.column_config.TextColumn(width="small"),
-            "CASH €":      st.column_config.TextColumn(width="small"),
-            "Tot. €":      st.column_config.TextColumn(width="small"),
-            "Emessa":      st.column_config.TextColumn(width="small"),
-            "Pagata":      st.column_config.TextColumn(width="small"),
-        },
-    )
+    _render_sticky_table(table_rows)
 
     if clinics_con_ritenuta:
         st.caption(
