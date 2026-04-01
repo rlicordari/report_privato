@@ -62,5 +62,9 @@
   {
     "name": "Pietro e Paolo",
     "retention_pct": 30
+  },
+  {
+    "name": "Patti",
+    "retention_pct": 20
   }
 ]
