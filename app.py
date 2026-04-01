@@ -344,6 +344,135 @@ def page_poliambulatori():
         st.success(f"✅ {len(new_clinics)} poliambulatori salvati!")
         st.rerun()
 
+# ─── PAGE: REPORT GLOBALE ────────────────────────────────────────────────────
+
+def page_report_globale():
+    st.title("🌐 Report Globale")
+
+    clinics = get_clinics()
+    if not clinics:
+        st.error("Nessun poliambulatorio configurato.")
+        return
+
+    clinic_map = {c["name"]: c["retention_pct"] for c in clinics}
+
+    now = datetime.now()
+    col1, col2 = st.columns(2)
+    with col1:
+        years = list(range(2024, now.year + 2))
+        year  = st.selectbox("Anno", years, index=years.index(now.year))
+    with col2:
+        month_name = st.selectbox("Mese", MONTHS_IT, index=now.month - 1)
+        month      = MONTHS_IT.index(month_name) + 1
+
+    df = get_visits()
+    if df.empty:
+        st.info("Nessun dato disponibile.")
+        return
+
+    df["data"] = pd.to_datetime(df["data"], errors="coerce")
+    df = df.dropna(subset=["data"])
+
+    mask     = (df["data"].dt.year == year) & (df["data"].dt.month == month)
+    filtered = df[mask].copy()
+
+    inv_df = get_invoices()
+
+    rows = []
+    for clinic in clinics:
+        name          = clinic["name"]
+        retention_pct = clinic["retention_pct"]
+        my_pct        = 100 - retention_pct
+
+        sub       = filtered[filtered["poliambulatorio"] == name]
+        n_visite  = len(sub)
+        tot_pos   = float(sub["pagato_pos"].sum())
+        tot_cash  = float(sub["pagato_cash"].sum())
+        mia_pos   = tot_pos  * (my_pct / 100)
+        mia_cash  = tot_cash * (my_pct / 100)
+
+        inv_mask  = (
+            (inv_df["anno"].astype(int) == year) &
+            (inv_df["mese"].astype(int) == month) &
+            (inv_df["poliambulatorio"] == name)
+        )
+        inv_row      = inv_df[inv_mask]
+        fat_emessa   = bool(inv_row.iloc[0]["fattura_emessa"]) if not inv_row.empty else False
+        fat_pagata   = bool(inv_row.iloc[0]["fattura_pagata"]) if not inv_row.empty else False
+
+        rows.append({
+            "Poliambulatorio":  name,
+            "Visite":           n_visite,
+            "Mia quota POS (€)":  round(mia_pos, 2),
+            "Mia quota CASH (€)": round(mia_cash, 2),
+            "Totale (€)":       round(mia_pos + mia_cash, 2),
+            "Fattura emessa":   "✅" if fat_emessa else "❌",
+            "Fattura pagata":   "✅" if fat_pagata else "❌",
+        })
+
+    result = pd.DataFrame(rows)
+
+    # Mostra solo le righe con almeno una visita (o tutte se tutte vuote)
+    has_data = result["Visite"].sum() > 0
+    if has_data:
+        display = result[result["Visite"] > 0].reset_index(drop=True)
+    else:
+        st.info(f"Nessuna visita registrata nel mese di **{month_name} {year}**.")
+        return
+
+    st.markdown(f"### {month_name} {year}")
+
+    # Totali in fondo
+    totali = {
+        "Poliambulatorio": "**TOTALE**",
+        "Visite":          display["Visite"].sum(),
+        "Mia quota POS (€)":  round(display["Mia quota POS (€)"].sum(), 2),
+        "Mia quota CASH (€)": round(display["Mia quota CASH (€)"].sum(), 2),
+        "Totale (€)":      round(display["Totale (€)"].sum(), 2),
+        "Fattura emessa":  "",
+        "Fattura pagata":  "",
+    }
+    display = pd.concat([display, pd.DataFrame([totali])], ignore_index=True)
+
+    st.dataframe(display, use_container_width=True, hide_index=True)
+
+
+# ─── PAGE: RICERCA PAZIENTE ──────────────────────────────────────────────────
+
+def page_ricerca():
+    st.title("🔍 Ricerca Paziente")
+
+    df = get_visits()
+    if df.empty:
+        st.info("Nessun dato disponibile.")
+        return
+
+    cognome_query = st.text_input("Cerca per cognome", placeholder="es. Rossi").strip()
+
+    if not cognome_query:
+        return
+
+    df["data"] = pd.to_datetime(df["data"], errors="coerce")
+    df = df.dropna(subset=["data"])
+
+    mask    = df["cognome"].str.contains(cognome_query, case=False, na=False)
+    results = df[mask].copy()
+
+    if results.empty:
+        st.warning(f"Nessun paziente trovato con cognome **{cognome_query}**.")
+        return
+
+    st.success(f"Trovati **{len(results)}** risultati per «{cognome_query}»")
+
+    display = results[["data", "nome", "cognome", "poliambulatorio", "pagato_pos", "pagato_cash"]].copy()
+    display["totale"] = display["pagato_pos"] + display["pagato_cash"]
+    display["data"]   = display["data"].dt.strftime("%d/%m/%Y")
+    display = display.sort_values("data", ascending=False)
+    display.columns = ["Data", "Nome", "Cognome", "Poliambulatorio", "POS (€)", "CASH (€)", "Totale (€)"]
+
+    st.dataframe(display, use_container_width=True, hide_index=True)
+
+
 # ─── MAIN ────────────────────────────────────────────────────────────────────
 
 def main():
@@ -355,7 +484,13 @@ def main():
         st.divider()
         page = st.radio(
             "Navigazione",
-            ["➕ Nuova Visita", "📊 Report", "🏥 Poliambulatori"],
+            [
+                "➕ Nuova Visita",
+                "📊 Report per singolo ambulatorio",
+                "🌐 Report Globale",
+                "🔍 Ricerca Paziente",
+                "🏥 Poliambulatori",
+            ],
             label_visibility="collapsed",
         )
         st.divider()
@@ -365,8 +500,12 @@ def main():
 
     if page == "➕ Nuova Visita":
         page_nuova_visita()
-    elif page == "📊 Report":
+    elif page == "📊 Report per singolo ambulatorio":
         page_report()
+    elif page == "🌐 Report Globale":
+        page_report_globale()
+    elif page == "🔍 Ricerca Paziente":
+        page_ricerca()
     elif page == "🏥 Poliambulatori":
         page_poliambulatori()
 
