@@ -222,10 +222,9 @@ def page_report():
     c2.metric("Totale POS (pazienti)", f"€ {total_pos:.2f}")
     c3.metric("Totale CASH (pazienti)", f"€ {total_cash:.2f}")
 
-    c4, c5, c6 = st.columns(3)
+    c4, c5 = st.columns(2)
     c4.metric(f"Tua quota POS ({my_pct}%)",  f"€ {my_pos:.2f}")
     c5.metric(f"Tua quota CASH ({my_pct}%)", f"€ {my_cash:.2f}")
-    c6.metric("Totale da fatturare", f"€ {total_inv:.2f}")
 
     # ── Dettaglio visite
     if not filtered.empty:
@@ -299,7 +298,10 @@ def page_poliambulatori():
     )
 
     clinics = get_clinics()
-    df = pd.DataFrame(clinics) if clinics else pd.DataFrame(columns=["name", "retention_pct"])
+    # Compatibilità: aggiungi ritenuta_acconto se mancante nei dati esistenti
+    for c in clinics:
+        c.setdefault("ritenuta_acconto", False)
+    df = pd.DataFrame(clinics) if clinics else pd.DataFrame(columns=["name", "retention_pct", "ritenuta_acconto"])
 
     edited = st.data_editor(
         df,
@@ -317,6 +319,11 @@ def page_poliambulatori():
                 format="%d",
                 help="% che il poliambulatorio trattiene. Es: 25 → a te resta il 75%.",
             ),
+            "ritenuta_acconto": st.column_config.CheckboxColumn(
+                "Ritenuta d'Acconto (20%)",
+                help="Se attivo, sul POS viene applicata la ritenuta d'acconto del 20% in fattura.",
+                default=False,
+            ),
         },
         num_rows="dynamic",
         use_container_width=True,
@@ -330,9 +337,9 @@ def page_poliambulatori():
                   .query("name != ''")
                   .to_dict(orient="records")
         )
-        # Assicura che retention_pct sia int
         for c in new_clinics:
-            c["retention_pct"] = int(c.get("retention_pct") or 0)
+            c["retention_pct"]    = int(c.get("retention_pct") or 0)
+            c["ritenuta_acconto"] = bool(c.get("ritenuta_acconto") or False)
 
         gh_write(
             CLINICS_FILE,
@@ -353,7 +360,8 @@ def page_report_globale():
         st.error("Nessun poliambulatorio configurato.")
         return
 
-    clinic_map = {c["name"]: c["retention_pct"] for c in clinics}
+    clinic_map      = {c["name"]: c["retention_pct"]                    for c in clinics}
+    ritenuta_map    = {c["name"]: c.get("ritenuta_acconto", False)       for c in clinics}
 
     now = datetime.now()
     col1, col2 = st.columns(2)
@@ -390,6 +398,11 @@ def page_report_globale():
         mia_pos   = tot_pos  * (my_pct / 100)
         mia_cash  = tot_cash * (my_pct / 100)
 
+        # Applica ritenuta d'acconto 20% sulla quota POS se abilitata
+        ha_ritenuta = ritenuta_map.get(name, False)
+        if ha_ritenuta:
+            mia_pos = mia_pos * 0.80
+
         inv_mask  = (
             (inv_df["anno"].astype(int) == year) &
             (inv_df["mese"].astype(int) == month) &
@@ -399,14 +412,15 @@ def page_report_globale():
         fat_emessa   = bool(inv_row.iloc[0]["fattura_emessa"]) if not inv_row.empty else False
         fat_pagata   = bool(inv_row.iloc[0]["fattura_pagata"]) if not inv_row.empty else False
 
+        pos_label = f"€ {mia_pos:.2f} *" if ha_ritenuta else f"€ {mia_pos:.2f}"
+
         rows.append({
-            "Poliambulatorio":  name,
-            "Visite":           n_visite,
-            "Mia quota POS (€)":  round(mia_pos, 2),
+            "Poliambulatorio":    name,
+            "Visite":             n_visite,
+            "Mia quota POS (€)":  pos_label,
             "Mia quota CASH (€)": round(mia_cash, 2),
-            "Totale (€)":       round(mia_pos + mia_cash, 2),
-            "Fattura emessa":   "✅" if fat_emessa else "❌",
-            "Fattura pagata":   "✅" if fat_pagata else "❌",
+            "Fattura emessa":     "✅" if fat_emessa else "❌",
+            "Fattura pagata":     "✅" if fat_pagata else "❌",
         })
 
     result = pd.DataFrame(rows)
@@ -421,19 +435,16 @@ def page_report_globale():
 
     st.markdown(f"### {month_name} {year}")
 
-    # Totali in fondo
-    totali = {
-        "Poliambulatorio": "**TOTALE**",
-        "Visite":          display["Visite"].sum(),
-        "Mia quota POS (€)":  round(display["Mia quota POS (€)"].sum(), 2),
-        "Mia quota CASH (€)": round(display["Mia quota CASH (€)"].sum(), 2),
-        "Totale (€)":      round(display["Totale (€)"].sum(), 2),
-        "Fattura emessa":  "",
-        "Fattura pagata":  "",
-    }
-    display = pd.concat([display, pd.DataFrame([totali])], ignore_index=True)
-
     st.dataframe(display, use_container_width=True, hide_index=True)
+
+    # Nota ritenuta d'acconto
+    clinics_con_ritenuta = [c["name"] for c in clinics if c.get("ritenuta_acconto") and
+                            not display[display["Poliambulatorio"] == c["name"]].empty]
+    if clinics_con_ritenuta:
+        st.caption(
+            "\\* Su **Mia quota POS** è applicata la Ritenuta d'Acconto del 20% per: "
+            + ", ".join(clinics_con_ritenuta) + "."
+        )
 
 
 # ─── PAGE: RICERCA PAZIENTE ──────────────────────────────────────────────────
