@@ -231,9 +231,8 @@ def page_report():
     if not filtered.empty:
         st.markdown("#### Dettaglio visite")
         display = filtered[["data", "nome", "cognome", "pagato_pos", "pagato_cash"]].copy()
-        display["totale"] = display["pagato_pos"] + display["pagato_cash"]
         display["data"]   = display["data"].dt.strftime("%d/%m/%Y")
-        display.columns   = ["Data", "Nome", "Cognome", "POS (€)", "CASH (€)", "Totale (€)"]
+        display.columns   = ["Data", "Nome", "Cognome", "POS (€)", "CASH (€)"]
         st.dataframe(display, use_container_width=True, hide_index=True)
     else:
         st.info(f"Nessuna visita registrata per **{poli}** nel mese di **{month_name} {year}**.")
@@ -465,10 +464,9 @@ def page_ricerca():
     st.success(f"Trovati **{len(results)}** risultati per «{cognome_query}»")
 
     display = results[["data", "nome", "cognome", "poliambulatorio", "pagato_pos", "pagato_cash"]].copy()
-    display["totale"] = display["pagato_pos"] + display["pagato_cash"]
     display["data"]   = display["data"].dt.strftime("%d/%m/%Y")
     display = display.sort_values("data", ascending=False)
-    display.columns = ["Data", "Nome", "Cognome", "Poliambulatorio", "POS (€)", "CASH (€)", "Totale (€)"]
+    display.columns = ["Data", "Nome", "Cognome", "Poliambulatorio", "POS (€)", "CASH (€)"]
 
     st.dataframe(display, use_container_width=True, hide_index=True)
 
