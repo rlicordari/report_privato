@@ -443,12 +443,15 @@ def page_report_globale():
     }
     display = pd.concat([display, pd.DataFrame([totale_row])], ignore_index=True)
 
-    # Formatta colonne POS per visualizzazione (aggiunge * dove c'è ritenuta)
+    # Formatta colonne per visualizzazione
     display["Mia quota POS (€)"]  = display.apply(
         lambda r: f"{r['_mia_pos_num']:.2f} *" if r["_ha_ritenuta"] else f"{r['_mia_pos_num']:.2f}", axis=1
     )
     display["Mia quota CASH (€)"] = display["_mia_cash_num"].apply(lambda v: f"{v:.2f}")
+    display["Totale (€)"]         = (display["_mia_pos_num"] + display["_mia_cash_num"]).apply(lambda v: f"{v:.2f}")
     display = display.drop(columns=["_mia_pos_num", "_mia_cash_num", "_ha_ritenuta"])
+    # Ordine colonne
+    display = display[["Poliambulatorio", "Visite", "Mia quota POS (€)", "Mia quota CASH (€)", "Totale (€)", "Fattura emessa", "Fattura pagata"]]
 
     st.markdown(f"### {month_name} {year}")
     st.dataframe(display, use_container_width=True, hide_index=True)
