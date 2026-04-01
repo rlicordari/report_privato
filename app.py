@@ -412,37 +412,55 @@ def page_report_globale():
         fat_emessa   = bool(inv_row.iloc[0]["fattura_emessa"]) if not inv_row.empty else False
         fat_pagata   = bool(inv_row.iloc[0]["fattura_pagata"]) if not inv_row.empty else False
 
-        pos_label = f"€ {mia_pos:.2f} *" if ha_ritenuta else f"€ {mia_pos:.2f}"
-
         rows.append({
-            "Poliambulatorio":    name,
-            "Visite":             n_visite,
-            "Mia quota POS (€)":  pos_label,
-            "Mia quota CASH (€)": round(mia_cash, 2),
-            "Fattura emessa":     "✅" if fat_emessa else "❌",
-            "Fattura pagata":     "✅" if fat_pagata else "❌",
+            "Poliambulatorio":     name,
+            "Visite":              n_visite,
+            "_mia_pos_num":        round(mia_pos, 2),
+            "_mia_cash_num":       round(mia_cash, 2),
+            "_ha_ritenuta":        ha_ritenuta,
+            "Fattura emessa":      "✅" if fat_emessa else "❌",
+            "Fattura pagata":      "✅" if fat_pagata else "❌",
         })
 
     result = pd.DataFrame(rows)
 
-    # Mostra solo le righe con almeno una visita (o tutte se tutte vuote)
     has_data = result["Visite"].sum() > 0
-    if has_data:
-        display = result[result["Visite"] > 0].reset_index(drop=True)
-    else:
+    if not has_data:
         st.info(f"Nessuna visita registrata nel mese di **{month_name} {year}**.")
         return
 
-    st.markdown(f"### {month_name} {year}")
+    display = result[result["Visite"] > 0].reset_index(drop=True)
 
+    # Riga totali (su valori numerici)
+    totale_row = {
+        "Poliambulatorio":  "TOTALE",
+        "Visite":           display["Visite"].sum(),
+        "_mia_pos_num":     round(display["_mia_pos_num"].sum(), 2),
+        "_mia_cash_num":    round(display["_mia_cash_num"].sum(), 2),
+        "_ha_ritenuta":     False,
+        "Fattura emessa":   "",
+        "Fattura pagata":   "",
+    }
+    display = pd.concat([display, pd.DataFrame([totale_row])], ignore_index=True)
+
+    # Formatta colonne POS per visualizzazione (aggiunge * dove c'è ritenuta)
+    display["Mia quota POS (€)"]  = display.apply(
+        lambda r: f"{r['_mia_pos_num']:.2f} *" if r["_ha_ritenuta"] else f"{r['_mia_pos_num']:.2f}", axis=1
+    )
+    display["Mia quota CASH (€)"] = display["_mia_cash_num"].apply(lambda v: f"{v:.2f}")
+    display = display.drop(columns=["_mia_pos_num", "_mia_cash_num", "_ha_ritenuta"])
+
+    st.markdown(f"### {month_name} {year}")
     st.dataframe(display, use_container_width=True, hide_index=True)
 
     # Nota ritenuta d'acconto
-    clinics_con_ritenuta = [c["name"] for c in clinics if c.get("ritenuta_acconto") and
-                            not display[display["Poliambulatorio"] == c["name"]].empty]
+    clinics_con_ritenuta = [
+        c["name"] for c in clinics
+        if c.get("ritenuta_acconto") and c["name"] in result[result["Visite"] > 0]["Poliambulatorio"].values
+    ]
     if clinics_con_ritenuta:
         st.caption(
-            "\\* Su **Mia quota POS** è applicata la Ritenuta d'Acconto del 20% per: "
+            "* Su **Mia quota POS** è applicata la Ritenuta d'Acconto del 20% per: "
             + ", ".join(clinics_con_ritenuta) + "."
         )
 
