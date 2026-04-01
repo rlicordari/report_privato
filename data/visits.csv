@@ -1,2 +1,199 @@
 data,poliambulatorio,nome,cognome,pagato_pos,pagato_cash
-2026-04-01,Parisi-Sottile,,prova,100.0,0.0
+2025-10-22,Parisi-Sottile,Grazia,Giammó,90.0,0.0
+2025-10-22,Parisi-Sottile,Francesco,Guidara,80.0,0.0
+2025-10-22,Parisi-Sottile,Antonella,Pavone,90.0,0.0
+2025-10-22,Parisi-Sottile,Fortunata,Di Bella,80.0,0.0
+2025-10-22,Policenter Leonardo,Anna,Cappadona,110.0,0.0
+2025-10-22,Policenter Leonardo,Rosita,Sirna,120.0,0.0
+2025-10-22,Policenter Leonardo,Alessia,Giacobbe,120.0,0.0
+2025-10-23,aDoc,Antonina,Merenda,90.0,0.0
+2025-10-23,aDoc,Elisa,Starvaggi,90.0,0.0
+2025-10-28,Cavour ME,Francesca,Abate,50.0,0.0
+2025-10-28,Cavour ME,Annamaria,Tarantino,50.0,0.0
+2025-10-28,Cavour ME,Patrizia,Russo,0.0,50.0
+2025-10-28,Cavour ME,Grazia,Aloisi,0.0,50.0
+2025-10-29,aDoc,Rosetta,Catena,90.0,0.0
+2025-10-29,aDoc,Francesca,Siciliano,90.0,0.0
+2025-10-29,aDoc,Adelina,Prestipino,130.0,0.0
+2025-11-03,Panacea RC,Maria,Briante,100.0,0.0
+2025-11-03,Panacea RC,Carlo,Calarci,0.0,100.0
+2025-11-03,Panacea RC,Alessia,Puntorieri,0.0,120.0
+2025-11-03,Panacea RC,Giulia,Secondo,0.0,120.0
+2025-11-06,aDoc,Maria Rosaria,Cusmà,90.0,0.0
+2025-11-12,Parisi-Sottile,Rosa,Cerrito,0.0,70.0
+2025-11-12,Parisi-Sottile,Agostino,Buono,90.0,0.0
+2025-11-12,Parisi-Sottile,Antonino,Carcione,0.0,40.0
+2025-11-12,Parisi-Sottile,Maria Gisella,Castagnole,0.0,50.0
+2025-11-12,aDoc,Carmela,Conti Nibali,90.0,0.0
+2025-11-12,Giallanza Torrenova,Carmela,Tris ari,90.0,0.0
+2025-11-13,Policenter Leonardo,Katia,Bonomo,120.0,0.0
+2025-11-13,Policenter Leonardo,Salvatore,Sirna,90.0,0.0
+2025-11-15,Selene BG,Daniela,Scarpa,140.0,0.0
+2025-11-15,Selene BG,Nicole,Molle,140.0,0.0
+2025-11-15,Selene BG,Rosaria Anna,Russo,160.0,0.0
+2025-11-15,Selene BG,Maurizio,Innocenti,160.0,0.0
+2025-11-18,Furci,Tiziana,Maria a,130.0,0.0
+2025-11-18,Furci,Maria,Del Popolo,130.0,0.0
+2025-11-18,Furci,Provvidenza,D’Arrigo,0.0,130.0
+2025-11-19,Giallanza Torrenova,Angela,Proto,90.0,0.0
+2025-11-19,Giallanza Torrenova,Marinella,Lo Monaco,0.0,0.0
+2025-11-19,Giallanza Torrenova,Carmela,Pizzino,0.0,70.0
+2025-11-19,STAF,Vincenzo,Gridà,80.0,0.0
+2025-11-19,STAF,Ceraolo,Giovanna,90.0,0.0
+2025-11-20,Tortorici,Giuseppe,Fiore,90.0,0.0
+2025-11-21,Panacea BPG,Antonio,Aliberto,80.0,0.0
+2025-11-24,Panacea RC,Giovanna,Paviglianiti,0.0,120.0
+2025-11-24,Panacea RC,Romana,Trunfio,120.0,0.0
+2025-11-24,Panacea RC,Lidia,Sartiano,120.0,0.0
+2025-11-24,Panacea RC,Giovanna,Calabró,120.0,0.0
+2025-11-24,Panacea RC,Giuseppe,Cutrupi,0.0,120.0
+2025-12-02,Furci,Angela,Palella,130.0,0.0
+2025-12-02,Furci,Tindara,Dottore,100.0,0.0
+2025-12-02,Furci,Giuseppina,Lo Re,100.0,0.0
+2025-12-02,Furci,Angelica Elvira,MAntarro,100.0,0.0
+2025-12-02,Furci,Angela,Spinelli,100.0,0.0
+2025-12-02,Furci,Santina,Spinelli,100.0,0.0
+2025-12-03,Parisi-Sottile,Giuseppina,Di Vizio,90.0,0.0
+2025-12-03,Parisi-Sottile,Teresa,Ruberto,90.0,0.0
+2025-12-03,Parisi-Sottile,Giuseppe,Granata,80.0,0.0
+2025-12-03,Giallanza Torrenova,Laura,Destro,0.0,50.0
+2025-12-03,Giallanza Torrenova,Benedetta,Crimi,90.0,0.0
+2025-12-04,aDoc,Santina,Saccone,0.0,90.0
+2025-12-04,aDoc,Francesca,Siciliano,0.0,130.0
+2025-12-04,Tortorici,Luisa,Germanà,0.0,90.0
+2025-12-04,Tortorici,Sebastana Maria,Russo,0.0,90.0
+2025-12-04,Tortorici,Dolores,Statepo,0.0,90.0
+2025-12-04,Tortorici,Annamaria,Calanni,90.0,0.0
+2025-12-09,Giarre,Rosa,Garozzo,100.0,0.0
+2025-12-09,Giarre,Venera,La Spina,100.0,0.0
+2025-12-10,Policenter Leonardo,Rosetta,Catena,80.0,0.0
+2025-12-10,Policenter Leonardo,Rosalia,Miracola,110.0,0.0
+2025-12-10,Giallanza Torrenova,Giuseppe,Mezzopane,90.0,0.0
+2025-12-10,Giallanza Torrenova,Giusy,Zagarella,100.0,0.0
+2025-12-11,Panacea BPG,Xxx,Allegra,0.0,70.0
+2025-12-16,Furci,,,0.0,150.0
+2025-12-16,Furci,,,0.0,150.0
+2025-12-17,Parisi-Sottile,,Natoli,90.0,0.0
+2025-12-17,Policenter Leonardo,Carmela,Petrolio,120.0,0.0
+2025-12-17,aDoc,Fabiola,Armeli,0.0,100.0
+2025-12-17,Giallanza Torrenova,Gabriele,Murano,90.0,0.0
+2025-12-19,Panacea BPG,Pietro,Di Pietro,80.0,0.0
+2025-12-19,Panacea BPG,Xxx,Crisafulli,0.0,100.0
+2025-12-22,Panacea RC,Maria,Spizzica,0.0,80.0
+2025-12-22,Panacea RC,Xxx,Verduci,0.0,80.0
+2025-12-22,Panacea RC,Caterina,Smeraldo,100.0,0.0
+2025-12-22,Panacea RC,Domenica,Repaci,150.0,0.0
+2025-12-22,Panacea RC,Annunziata,Scopelliti,150.0,0.0
+2025-12-22,Panacea RC,Mattia,Curatola,100.0,0.0
+2025-12-22,Panacea RC,Martina,Calabrese,0.0,100.0
+2025-12-22,Panacea RC,Anna Maria,Leonardo,0.0,100.0
+2025-12-22,Panacea RC,Xxx,Fam Leonardo,0.0,80.0
+2025-12-22,Panacea RC,xxx,Fam.Leonardo,0.0,100.0
+2026-01-07,Policenter Leonardo,Flavia,Manera,90.0,0.0
+2026-01-07,Policenter Leonardo,Calogero,Olivera,0.0,130.0
+2026-01-08,Tortorici,Francesca,Triscari,90.0,0.0
+2026-01-08,Tortorici,Xxx,Trusso Cafarello,0.0,110.0
+2026-01-08,Giallanza Torrenova,Xxx,Scurria,100.0,0.0
+2026-01-12,Panacea RC,Maria Giuseppa,Triplo,120.0,0.0
+2026-01-12,Panacea RC,Domenico,Taverriti,120.0,0.0
+2026-01-12,Panacea RC,Vittorio,Ferraro,0.0,100.0
+2026-01-12,Panacea RC,Giovanni,Porpiglia,0.0,100.0
+2026-01-14,Giallanza Torrenova,Xxx,Pinzone,90.0,0.0
+2026-01-14,Giallanza Torrenova,Xxx,Galati,90.0,0.0
+2026-01-15,Parisi-Sottile,Xxx,,90.0,0.0
+2026-01-15,Parisi-Sottile,Claudia,Pidalà,80.0,0.0
+2026-01-21,Policenter Leonardo,Rosanna,Greco,120.0,0.0
+2026-01-21,aDoc,Ermelinda,Randazzo,100.0,0.0
+2026-01-21,aDoc,Noemi,Messinese,100.0,0.0
+2026-01-21,aDoc,Maria,Maressa,90.0,0.0
+2026-01-21,aDoc,Giovanna,Santamaria,150.0,0.0
+2026-01-21,aDoc,Simona,Manzo,100.0,0.0
+2026-01-22,Tortorici,Carmela,Monastra,0.0,80.0
+2026-01-22,Tortorici,Laura,Pricchia Galati,90.0,0.0
+2026-01-22,Tortorici,Vanessa,Stella,90.0,0.0
+2026-01-23,Panacea BPG,Alessia,Merlino,80.0,0.0
+2026-01-23,Panacea BPG,Carmelina,D’Amico,0.0,100.0
+2026-01-25,Selene BG,Nicole,Molle,100.0,0.0
+2026-01-25,Selene BG,Anna,Simonetta,130.0,0.0
+2026-01-25,Selene BG,Beatrice,Lorenzo,100.0,0.0
+2026-01-25,Selene BG,Raffaella,Abboni,120.0,0.0
+2026-01-28,Parisi-Sottile,Eugenia,Marta,90.0,0.0
+2026-01-28,Parisi-Sottile,Maria Teresa,Salpietro,0.0,80.0
+2026-01-29,Tortorici,Maria Arturo,Calà Lesina,90.0,0.0
+2026-01-29,aDoc,Giovanna,Santamaria,100.0,0.0
+2026-01-29,Giallanza Torrenova,Giuseppa,Zagarella,80.0,0.0
+2026-01-30,Cavour ME,Estera,Estera,0.0,110.0
+2026-02-02,Panacea RC,Francesca,Cannizzaro,100.0,0.0
+2026-02-02,Panacea RC,Giovanna,Delfino,100.0,0.0
+2026-02-02,Panacea RC,Fabiana,Venezia,0.0,80.0
+2026-02-02,Panacea RC,Maria Gioavanna,Squillaci,100.0,0.0
+2026-02-02,Panacea RC,Teodora,Vadalà,100.0,0.0
+2026-02-02,Panacea RC,Natalina,Paletto,100.0,0.0
+2026-02-03,Giarre,Luca Pietro,Basta,100.0,0.0
+2026-02-03,Giarre,Pamela,Greci,130.0,0.0
+2026-02-09,Pistunina,Giovanna,Sofia,80.0,0.0
+2026-02-09,Pistunina,Antonina Elisa,Fazio,80.0,0.0
+2026-02-09,Pistunina,Letteria,Boncordo,80.0,0.0
+2026-02-09,Pistunina,Carmela,Arigó,80.0,0.0
+2026-02-10,Furci,Amelia,Di Blasi,100.0,0.0
+2026-02-11,Giallanza Torrenova,Maria Catena,Malacorda,0.0,50.0
+2026-02-11,Giallanza Torrenova,Salvatore,Proietto,100.0,0.0
+2026-02-11,Policenter Leonardo,Nunzia,Casilli,130.0,0.0
+2026-02-11,Policenter Leonardo,Nunziatina,Carlo,130.0,0.0
+2026-02-12,Tortorici,Sevastiana Maria,Russo,0.0,90.0
+2026-02-12,Tortorici,Xxx,Pricchia qualcosa,80.0,0.0
+2026-02-18,Giallanza Torrenova,Lucia,Tomasi,80.0,0.0
+2026-02-18,Giallanza Torrenova,Sebastiana,Galati Pontillo Sardo,80.0,0.0
+2026-02-18,Giallanza Torrenova,Teresa,La Rosa,90.0,0.0
+2026-02-18,Giallanza Torrenova,Giovanna,Marino Tirri,0.0,0.0
+2026-02-18,Giallanza Torrenova,Xxxx,Sgró,100.0,0.0
+2026-02-23,Panacea RC,Xxx,Priolo,0.0,80.0
+2026-02-23,Panacea RC,Xxx,Femia,0.0,100.0
+2026-02-23,Panacea RC,Xxx,Squillaci,100.0,0.0
+2026-02-11,Orlandino,Xxxx,Kouthnuoa,100.0,0.0
+2026-02-24,Furci,Alberto,Xxx,0.0,100.0
+2026-02-24,Sinergo Me,Anna,Stimoli,100.0,0.0
+2026-02-25,aDoc,Comp Tindaro,Miragliotta,0.0,150.0
+2026-02-25,aDoc,Simona,Manzo,0.0,80.0
+2026-02-25,aDoc,Teresa,Sberna,0.0,80.0
+2026-02-26,Tortorici,Carmela,Monastra,90.0,0.0
+2026-03-02,Pistunina,Antonella,Romano,80.0,0.0
+2026-03-03,Giarre,Luca Pietro,Vasta,90.0,0.0
+2026-03-03,Giarre,Francesca,Cerra,100.0,0.0
+2026-03-03,Giarre,Cristina,Caimi,100.0,0.0
+2026-03-03,Giarre,Giuseppe,Russo,80.0,0.0
+2026-03-04,Orlandino,Lucrezia,Messina,0.0,100.0
+2026-03-04,Orlandino,Natale,Gammeri,0.0,100.0
+2026-03-05,Policenter Leonardo,Lidia,Armeli,100.0,0.0
+2026-03-05,Policenter Leonardo,Maria Catena,Castano,0.0,90.0
+2026-03-05,Tortorici,Xxx,Triscari,0.0,80.0
+2026-03-08,Selene BG,Ammoni,Raffaella,120.0,0.0
+2026-03-08,Selene BG,Alien,Guaina,110.0,0.0
+2026-03-08,Selene BG,Ruggero,Oldrati,110.0,0.0
+2026-03-10,Cavour ME,Simona,Prestopino,80.0,0.0
+2026-03-11,Parisi-Sottile,Tommaso,Quartararo,90.0,0.0
+2026-03-11,Parisi-Sottile,Maria Grazia,Bruneo,90.0,0.0
+2026-03-11,Parisi-Sottile,Emiliana,Marano,90.0,0.0
+2026-03-11,Parisi-Sottile,Giuseppe,Granata,80.0,0.0
+2026-03-11,Pietro e Paolo,Arcangelo,Laguardia,100.0,0.0
+2026-03-11,Pietro e Paolo,Nunzia,Triglia,85.0,0.0
+2026-03-12,aDoc,Maria,Cardia,0.0,90.0
+2026-03-16,Panacea RC,Antonia,Riserbato,120.0,0.0
+2026-03-16,Panacea RC,Maria Francesca,Morabito,120.0,0.0
+2026-03-16,Panacea RC,Antonio,Pizzimenti,150.0,0.0
+2026-03-16,Panacea RC,Giuseppa,Datti la,150.0,0.0
+2026-03-17,Furci,Maria,Camillen,0.0,100.0
+2026-03-17,Furci,Annunziata,Mantarro,0.0,100.0
+2026-03-17,Furci,Santa,Solima,0.0,90.0
+2026-03-18,Giallanza Torrenova,Lucia,Tomasi,70.0,0.0
+2026-03-25,aDoc,Livia,Cangemi,0.0,100.0
+2026-03-25,aDoc,Giuseppa,Cangemi,0.0,100.0
+2026-03-25,Orlandino,Padre di,Franchina,0.0,80.0
+2026-03-25,Orlandino,Maria,Piscitello,80.0,0.0
+2026-03-25,Orlandino,Mariarosa,Giammó,100.0,0.0
+2026-03-26,Tortorici,Sofia,TileNoi,0.0,80.0
+2026-03-26,Tortorici,Concetta,Machi,0.0,100.0
+2026-03-26,Tortorici,Sebastiano,Germanà,0.0,80.0
+2026-03-26,Policenter Leonardo,Fabrizio,Bagalà,100.0,0.0
+2026-03-26,Giallanza Torrenova,Xxx,Damiano,0.0,80.0
+2026-03-27,Cavour ME,Fabio,Bruschetta,100.0,0.0
