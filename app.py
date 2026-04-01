@@ -379,50 +379,67 @@ def _render_sticky_table(rows: list[dict]):
     border-collapse: collapse;
     font-size: 13px;
     min-width: max-content;
-    color: var(--text-color);
+    color: #31333f;
   }}
   .gt-wrap th, .gt-wrap td {{
-    border: 1px solid rgba(128,128,128,0.3);
+    border: 1px solid rgba(0,0,0,0.15);
     padding: 6px 10px;
     white-space: nowrap;
     text-align: right;
-    color: var(--text-color);
-    background: var(--background-color);
+    background-color: #ffffff;
+    color: #31333f;
   }}
-  /* Prima colonna: sticky a sinistra — background opaco obbligatorio */
+  .gt-wrap tbody tr:nth-child(even) td {{
+    background-color: #f0f2f6;
+  }}
+  .gt-wrap tr.totale td {{
+    font-weight: bold;
+    background-color: #f0f2f6;
+    border-top: 2px solid rgba(0,0,0,0.3);
+  }}
+  /* Header sticky */
+  .gt-wrap thead th {{
+    position: sticky;
+    top: 0;
+    background-color: #e8eaf0 !important;
+    z-index: 3;
+    font-weight: 600;
+  }}
+  /* Prima colonna sticky */
   .gt-wrap th:first-child,
   .gt-wrap td:first-child {{
     position: sticky;
     left: 0;
     text-align: left;
     z-index: 2;
-    background-color: var(--background-color) !important;
-    box-shadow: 3px 0 6px -2px rgba(0,0,0,0.25);
+    box-shadow: 3px 0 5px -1px rgba(0,0,0,0.2);
     min-width: 130px;
     max-width: 150px;
     overflow: hidden;
     text-overflow: ellipsis;
   }}
-  /* Header: sticky in alto */
-  .gt-wrap thead th {{
-    position: sticky;
-    top: 0;
-    background-color: var(--secondary-background-color) !important;
-    z-index: 3;
-    font-weight: 600;
-  }}
-  .gt-wrap thead th:first-child {{
-    z-index: 4;
-  }}
-  /* Riga totale */
-  .gt-wrap tr.totale td {{
-    font-weight: bold;
-    background-color: var(--secondary-background-color);
-    border-top: 2px solid rgba(128,128,128,0.5);
-  }}
-  /* Righe alternate */
-  .gt-wrap tbody tr:not(.totale):nth-child(even) td {{
-    background-color: var(--secondary-background-color);
+  /* Prima colonna: forza background opaco per ogni tipo di riga */
+  .gt-wrap tbody tr:nth-child(odd) td:first-child  {{ background-color: #ffffff !important; }}
+  .gt-wrap tbody tr:nth-child(even) td:first-child  {{ background-color: #f0f2f6 !important; }}
+  .gt-wrap tr.totale td:first-child                 {{ background-color: #f0f2f6 !important; }}
+  .gt-wrap thead th:first-child                     {{ background-color: #e8eaf0 !important; z-index: 4; }}
+
+  /* ── DARK MODE ── */
+  @media (prefers-color-scheme: dark) {{
+    .gt-wrap table {{ color: #fafafa; }}
+    .gt-wrap th, .gt-wrap td {{
+      color: #fafafa;
+      background-color: #0e1117;
+      border-color: rgba(255,255,255,0.12);
+    }}
+    .gt-wrap tbody tr:nth-child(even) td  {{ background-color: #262730; }}
+    .gt-wrap tr.totale td                 {{ background-color: #262730; border-top-color: rgba(255,255,255,0.3); }}
+    .gt-wrap thead th                     {{ background-color: #1e2029 !important; }}
+
+    .gt-wrap tbody tr:nth-child(odd) td:first-child  {{ background-color: #0e1117 !important; }}
+    .gt-wrap tbody tr:nth-child(even) td:first-child  {{ background-color: #262730 !important; }}
+    .gt-wrap tr.totale td:first-child                 {{ background-color: #262730 !important; }}
+    .gt-wrap thead th:first-child                     {{ background-color: #1e2029 !important; }}
   }}
 </style>
 <div class="gt-wrap">
