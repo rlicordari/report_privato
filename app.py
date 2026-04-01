@@ -150,6 +150,8 @@ def page_nuova_visita():
             "pagato_cash":     cash,
         }
         df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+        # Normalizza tutte le date al formato YYYY-MM-DD prima di salvare
+        df["data"] = pd.to_datetime(df["data"], errors="coerce").dt.strftime("%Y-%m-%d")
         gh_write(
             VISITS_FILE,
             df.to_csv(index=False),
