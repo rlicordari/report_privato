@@ -1,3 +1,4 @@
 data,poliambulatorio,nome,cognome,pagato_pos,pagato_cash
-2026-04-01 00:00:00,Giallanza Torrenova,Roberto,Licordari,1000.0,0.0
-2026-03-31,Giallanza Torrenova,prova,Giallanza,0.0,89.0
+2026-04-01,Giallanza Torrenova,Roberto,Licordari,1000.0,0.0
+,Giallanza Torrenova,prova,Giallanza,0.0,89.0
+,Giallanza Torrenova,Roberto,Licordari,0.0,89.0
