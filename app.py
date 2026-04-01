@@ -379,12 +379,15 @@ def _render_sticky_table(rows: list[dict]):
     border-collapse: collapse;
     font-size: 13px;
     min-width: max-content;
+    color: var(--text-color);
   }}
   .gt-wrap th, .gt-wrap td {{
-    border: 1px solid #d0d0d0;
+    border: 1px solid rgba(128,128,128,0.3);
     padding: 6px 10px;
     white-space: nowrap;
     text-align: right;
+    color: var(--text-color);
+    background: var(--background-color);
   }}
   /* Prima colonna: sticky a sinistra */
   .gt-wrap th:first-child,
@@ -393,8 +396,8 @@ def _render_sticky_table(rows: list[dict]):
     left: 0;
     text-align: left;
     z-index: 2;
-    background: #ffffff;
-    border-right: 2px solid #aaa;
+    background: var(--background-color);
+    border-right: 2px solid rgba(128,128,128,0.5);
     min-width: 130px;
     max-width: 150px;
     overflow: hidden;
@@ -404,28 +407,29 @@ def _render_sticky_table(rows: list[dict]):
   .gt-wrap thead th {{
     position: sticky;
     top: 0;
-    background: #f0f2f6;
+    background: var(--secondary-background-color);
     z-index: 3;
+    font-weight: 600;
   }}
   .gt-wrap thead th:first-child {{
     z-index: 4;
-    background: #e8eaf0;
+    background: var(--secondary-background-color);
   }}
   /* Riga totale */
   .gt-wrap tr.totale td {{
     font-weight: bold;
-    background: #f8f9fc;
-    border-top: 2px solid #aaa;
+    background: var(--secondary-background-color);
+    border-top: 2px solid rgba(128,128,128,0.5);
   }}
   .gt-wrap tr.totale td:first-child {{
-    background: #f0f2f6;
+    background: var(--secondary-background-color);
   }}
   /* Righe alternate */
   .gt-wrap tbody tr:not(.totale):nth-child(even) td {{
-    background: #fafafa;
+    background: var(--secondary-background-color);
   }}
   .gt-wrap tbody tr:not(.totale):nth-child(even) td:first-child {{
-    background: #f5f5f5;
+    background: var(--secondary-background-color);
   }}
 </style>
 <div class="gt-wrap">
