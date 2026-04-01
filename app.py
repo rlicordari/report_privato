@@ -389,15 +389,15 @@ def _render_sticky_table(rows: list[dict]):
     color: var(--text-color);
     background: var(--background-color);
   }}
-  /* Prima colonna: sticky a sinistra */
+  /* Prima colonna: sticky a sinistra — background opaco obbligatorio */
   .gt-wrap th:first-child,
   .gt-wrap td:first-child {{
     position: sticky;
     left: 0;
     text-align: left;
     z-index: 2;
-    background: var(--background-color);
-    border-right: 2px solid rgba(128,128,128,0.5);
+    background-color: var(--background-color) !important;
+    box-shadow: 3px 0 6px -2px rgba(0,0,0,0.25);
     min-width: 130px;
     max-width: 150px;
     overflow: hidden;
@@ -407,29 +407,22 @@ def _render_sticky_table(rows: list[dict]):
   .gt-wrap thead th {{
     position: sticky;
     top: 0;
-    background: var(--secondary-background-color);
+    background-color: var(--secondary-background-color) !important;
     z-index: 3;
     font-weight: 600;
   }}
   .gt-wrap thead th:first-child {{
     z-index: 4;
-    background: var(--secondary-background-color);
   }}
   /* Riga totale */
   .gt-wrap tr.totale td {{
     font-weight: bold;
-    background: var(--secondary-background-color);
+    background-color: var(--secondary-background-color);
     border-top: 2px solid rgba(128,128,128,0.5);
-  }}
-  .gt-wrap tr.totale td:first-child {{
-    background: var(--secondary-background-color);
   }}
   /* Righe alternate */
   .gt-wrap tbody tr:not(.totale):nth-child(even) td {{
-    background: var(--secondary-background-color);
-  }}
-  .gt-wrap tbody tr:not(.totale):nth-child(even) td:first-child {{
-    background: var(--secondary-background-color);
+    background-color: var(--secondary-background-color);
   }}
 </style>
 <div class="gt-wrap">
