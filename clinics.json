@@ -1,19 +1,66 @@
 [
-  { "name": "Parisi-Sottile",          "retention_pct": 0  },
-  { "name": "Policenter Leonardo 25%", "retention_pct": 25 },
-  { "name": "aDoc 20%",               "retention_pct": 20 },
-  { "name": "Cavour ME 20%",          "retention_pct": 20 },
-  { "name": "Panacea RC 25%",         "retention_pct": 25 },
-  { "name": "Selene BG 30%",          "retention_pct": 30 },
-  { "name": "Furci 25%",              "retention_pct": 25 },
-  { "name": "Giallanza Torrenova",    "retention_pct": 0  },
-  { "name": "STAF",                   "retention_pct": 0  },
-  { "name": "Tortorici 25%",          "retention_pct": 25 },
-  { "name": "Panacea BPG 30%",        "retention_pct": 30 },
-  { "name": "Giarre 25%",             "retention_pct": 25 },
-  { "name": "Pistunina 30%",          "retention_pct": 30 },
-  { "name": "Orlandino 25%",          "retention_pct": 25 },
-  { "name": "Galeno Milazzo 30%",     "retention_pct": 30 },
-  { "name": "Sinergo Me",             "retention_pct": 0  },
-  { "name": "Pietro e Paolo 30%",     "retention_pct": 30 }
+  {
+    "name": "Parisi-Sottile",
+    "retention_pct": 0
+  },
+  {
+    "name": "Policenter Leonardo",
+    "retention_pct": 25
+  },
+  {
+    "name": "aDoc",
+    "retention_pct": 20
+  },
+  {
+    "name": "Cavour ME",
+    "retention_pct": 20
+  },
+  {
+    "name": "Panacea RC",
+    "retention_pct": 25
+  },
+  {
+    "name": "Selene BG",
+    "retention_pct": 30
+  },
+  {
+    "name": "Furci",
+    "retention_pct": 25
+  },
+  {
+    "name": "Giallanza Torrenova",
+    "retention_pct": 0
+  },
+  {
+    "name": "Tortorici",
+    "retention_pct": 25
+  },
+  {
+    "name": "Panacea BPG",
+    "retention_pct": 30
+  },
+  {
+    "name": "Giarre",
+    "retention_pct": 25
+  },
+  {
+    "name": "Pistunina",
+    "retention_pct": 30
+  },
+  {
+    "name": "Orlandino",
+    "retention_pct": 25
+  },
+  {
+    "name": "Galeno Milazzo",
+    "retention_pct": 30
+  },
+  {
+    "name": "Sinergo ME",
+    "retention_pct": 0
+  },
+  {
+    "name": "Pietro e Paolo",
+    "retention_pct": 30
+  }
 ]
