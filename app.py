@@ -428,46 +428,54 @@ def page_report_globale():
         st.info(f"Nessuna visita registrata nel mese di **{month_name} {year}**.")
         return
 
-    # ── Totali generali in cima
-    tot_visite   = sum(r["Visite"]        for r in active)
-    tot_mia_pos  = sum(r["_mia_pos_num"]  for r in active)
-    tot_mia_cash = sum(r["_mia_cash_num"] for r in active)
+    clinics_con_ritenuta = [r["Poliambulatorio"] for r in active if r["_ha_ritenuta"]]
+
+    # Costruisce tabella con colonne compatte
+    table_rows = []
+    for r in active:
+        pos_val = f"{r['_mia_pos_num']:.2f}*" if r["_ha_ritenuta"] else f"{r['_mia_pos_num']:.2f}"
+        table_rows.append({
+            "Ambulatorio": r["Poliambulatorio"],
+            "N.":          r["Visite"],
+            "POS €":       pos_val,
+            "CASH €":      f"{r['_mia_cash_num']:.2f}",
+            "Tot. €":      f"{r['_mia_pos_num'] + r['_mia_cash_num']:.2f}",
+            "Emessa":      r["Fattura emessa"],
+            "Pagata":      r["Fattura pagata"],
+        })
+
+    # Riga TOTALE
+    table_rows.append({
+        "Ambulatorio": "TOTALE",
+        "N.":          sum(r["Visite"]        for r in active),
+        "POS €":       f"{sum(r['_mia_pos_num']  for r in active):.2f}",
+        "CASH €":      f"{sum(r['_mia_cash_num'] for r in active):.2f}",
+        "Tot. €":      f"{sum(r['_mia_pos_num'] + r['_mia_cash_num'] for r in active):.2f}",
+        "Emessa":      "",
+        "Pagata":      "",
+    })
+
+    display = pd.DataFrame(table_rows)
 
     st.markdown(f"### {month_name} {year}")
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Visite totali",    tot_visite)
-    c2.metric("Totale quota POS", f"€ {tot_mia_pos:.2f}")
-    c3.metric("Totale quota CASH",f"€ {tot_mia_cash:.2f}")
-    st.metric("Totale mese", f"€ {tot_mia_pos + tot_mia_cash:.2f}")
-
-    st.divider()
-
-    # ── Card per ogni poliambulatorio
-    clinics_con_ritenuta = []
-    for r in active:
-        name        = r["Poliambulatorio"]
-        ha_ritenuta = r["_ha_ritenuta"]
-        mia_pos     = r["_mia_pos_num"]
-        mia_cash    = r["_mia_cash_num"]
-        totale      = mia_pos + mia_cash
-        if ha_ritenuta:
-            clinics_con_ritenuta.append(name)
-
-        pos_label = f"€ {mia_pos:.2f} *" if ha_ritenuta else f"€ {mia_pos:.2f}"
-
-        with st.container(border=True):
-            st.markdown(f"**{name}** &nbsp;&nbsp; `{r['Visite']} {'visita' if r['Visite'] == 1 else 'visite'}`")
-            ca, cb, cc = st.columns(3)
-            ca.metric("Quota POS",  pos_label)
-            cb.metric("Quota CASH", f"€ {mia_cash:.2f}")
-            cc.metric("Totale",     f"€ {totale:.2f}")
-            fe_col, fp_col = st.columns(2)
-            fe_col.markdown(f"Fattura emessa: {r['Fattura emessa']}")
-            fp_col.markdown(f"Fattura pagata: {r['Fattura pagata']}")
+    st.dataframe(
+        display,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Ambulatorio": st.column_config.TextColumn(width="medium"),
+            "N.":          st.column_config.TextColumn(width="small"),
+            "POS €":       st.column_config.TextColumn(width="small"),
+            "CASH €":      st.column_config.TextColumn(width="small"),
+            "Tot. €":      st.column_config.TextColumn(width="small"),
+            "Emessa":      st.column_config.TextColumn(width="small"),
+            "Pagata":      st.column_config.TextColumn(width="small"),
+        },
+    )
 
     if clinics_con_ritenuta:
         st.caption(
-            "* Su **Quota POS** è applicata la Ritenuta d'Acconto del 20% per: "
+            "* Su **POS** è applicata la Ritenuta d'Acconto del 20% per: "
             + ", ".join(clinics_con_ritenuta) + "."
         )
 
