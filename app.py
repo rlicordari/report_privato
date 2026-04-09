@@ -235,10 +235,25 @@ def page_report():
     # ── Dettaglio visite
     if not filtered.empty:
         st.markdown("#### Dettaglio visite")
-        display = filtered[["data", "nome", "cognome", "pagato_pos", "pagato_cash"]].copy()
-        display["data"]   = display["data"].dt.strftime("%d/%m/%Y")
-        display.columns   = ["Data", "Nome", "Cognome", "POS (€)", "CASH (€)"]
-        st.dataframe(display, use_container_width=True, hide_index=True)
+        for idx, row in filtered.iterrows():
+            col_a, col_b, col_c, col_d, col_e, col_del = st.columns([2, 2, 2, 1.5, 1.5, 1])
+            col_a.write(row["data"].strftime("%d/%m/%Y"))
+            col_b.write(row["nome"])
+            col_c.write(row["cognome"])
+            col_d.write(f"€ {float(row['pagato_pos']):.2f}")
+            col_e.write(f"€ {float(row['pagato_cash']):.2f}")
+            if col_del.button("🗑️", key=f"del_{idx}", help="Elimina visita"):
+                full_df = get_visits()
+                full_df["data"] = pd.to_datetime(full_df["data"], errors="coerce")
+                full_df = full_df.drop(index=idx).reset_index(drop=True)
+                full_df["data"] = full_df["data"].dt.strftime("%Y-%m-%d")
+                gh_write(
+                    VISITS_FILE,
+                    full_df.to_csv(index=False),
+                    msg=f"Elimina visita: {row['cognome']} {row['nome']} @ {poli} ({row['data'].date()})",
+                )
+                _clear_cache()
+                st.rerun()
     else:
         st.info(f"Nessuna visita registrata per **{poli}** nel mese di **{month_name} {year}**.")
 
