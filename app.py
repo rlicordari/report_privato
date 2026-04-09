@@ -114,20 +114,24 @@ def page_nuova_visita():
 
     clinic_names = [c["name"] for c in clinics]
 
+    # Ricorda l'ultimo poliambulatorio usato
+    last = st.session_state.get("last_clinic")
+    default_idx = clinic_names.index(last) if last in clinic_names else 0
+
     with st.form("form_visita", clear_on_submit=True):
         col1, col2 = st.columns(2)
 
         with col1:
-            poli = st.selectbox("Poliambulatorio *", clinic_names)
+            poli = st.selectbox("Poliambulatorio *", clinic_names, index=default_idx)
             data_visita = st.date_input("Data *", value=date.today())
             nome = st.text_input("Nome paziente")
             cognome = st.text_input("Cognome paziente *")
 
         with col2:
             st.markdown("**Pagamento**")
-            pos  = st.number_input("Importo POS (€)",  min_value=0.0, step=10.0, format="%.2f")
-            cash = st.number_input("Importo CASH (€)", min_value=0.0, step=10.0, format="%.2f")
-            totale = pos + cash
+            pos  = st.number_input("Importo POS (€)",  min_value=0.0, step=10.0, format="%.2f", value=None, placeholder="0.00")
+            cash = st.number_input("Importo CASH (€)", min_value=0.0, step=10.0, format="%.2f", value=None, placeholder="0.00")
+            totale = (pos or 0) + (cash or 0)
             if totale > 0:
                 st.info(f"Totale visita: **€ {totale:.2f}**")
 
@@ -137,8 +141,10 @@ def page_nuova_visita():
         if not cognome.strip():
             st.error("Il cognome del paziente è obbligatorio.")
             return
-        if pos == 0 and cash == 0:
+        if (pos or 0) == 0 and (cash or 0) == 0:
             st.warning("Attenzione: importo POS e CASH sono entrambi 0.")
+
+        st.session_state.last_clinic = poli
 
         df = get_visits()
         new_row = {
@@ -146,8 +152,8 @@ def page_nuova_visita():
             "poliambulatorio": poli,
             "nome":            nome.strip(),
             "cognome":         cognome.strip(),
-            "pagato_pos":      pos,
-            "pagato_cash":     cash,
+            "pagato_pos":      pos or 0,
+            "pagato_cash":     cash or 0,
         }
         df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
         # Normalizza tutte le date al formato YYYY-MM-DD prima di salvare
