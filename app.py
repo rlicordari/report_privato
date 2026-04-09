@@ -307,6 +307,67 @@ def page_report():
         st.success("Stato fattura aggiornato!")
         st.rerun()
 
+    # ── Andamento nel tempo
+    st.divider()
+    st.markdown("#### 📈 Andamento nel tempo")
+
+    mesi_range = st.radio(
+        "Periodo di analisi",
+        [3, 6, 12],
+        format_func=lambda x: f"{x} mesi",
+        horizontal=True,
+        key="trend_range",
+    )
+
+    ha_ritenuta = next((c.get("ritenuta_acconto", False) for c in clinics if c["name"] == poli), False)
+
+    # Costruisce la lista di (anno, mese) a ritroso dal mese selezionato
+    periods = []
+    for i in range(mesi_range - 1, -1, -1):
+        m = month - i
+        y = year
+        while m <= 0:
+            m += 12
+            y -= 1
+        periods.append((y, m))
+
+    trend_rows = []
+    for (y, m) in periods:
+        mask_t = (df["data"].dt.year == y) & (df["data"].dt.month == m) & (df["poliambulatorio"] == poli)
+        sub    = df[mask_t]
+        my_p   = float(sub["pagato_pos"].sum())  * (my_pct / 100)
+        my_c   = float(sub["pagato_cash"].sum()) * (my_pct / 100)
+        if ha_ritenuta:
+            my_p = my_p * 0.80
+        trend_rows.append({
+            "Mese":   f"{MONTHS_IT[m - 1][:3]} {y}",
+            "POS":    round(my_p, 2),
+            "CASH":   round(my_c, 2),
+            "Totale": round(my_p + my_c, 2),
+        })
+
+    trend_df = pd.DataFrame(trend_rows).set_index("Mese")
+    st.line_chart(trend_df)
+
+    # Variazione percentuale primo → ultimo mese del periodo
+    def _pct(first, last):
+        return (last - first) / first * 100 if first != 0 else None
+
+    def _fmt(val):
+        if val is None:
+            return "n/d"
+        return f"{'+'if val >= 0 else ''}{val:.1f}%"
+
+    first, last = trend_rows[0], trend_rows[-1]
+    label_from  = f"{MONTHS_IT[periods[0][1] - 1][:3]} {periods[0][0]}"
+    label_to    = f"{MONTHS_IT[periods[-1][1] - 1][:3]} {periods[-1][0]}"
+    st.caption(f"Variazione **{label_from} → {label_to}**")
+
+    mc1, mc2, mc3 = st.columns(3)
+    mc1.metric("Totale", f"€ {last['Totale']:.2f}", _fmt(_pct(first["Totale"], last["Totale"])))
+    mc2.metric("POS",    f"€ {last['POS']:.2f}",    _fmt(_pct(first["POS"],    last["POS"])))
+    mc3.metric("CASH",   f"€ {last['CASH']:.2f}",   _fmt(_pct(first["CASH"],   last["CASH"])))
+
 # ─── PAGE: GESTIONE POLIAMBULATORI ───────────────────────────────────────────
 
 def page_poliambulatori():
