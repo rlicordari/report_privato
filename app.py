@@ -114,15 +114,15 @@ def page_nuova_visita():
 
     clinic_names = [c["name"] for c in clinics]
 
-    # Ricorda l'ultimo poliambulatorio usato
-    last = st.session_state.get("last_clinic")
+    # Selectbox FUORI dal form: clear_on_submit non lo resetta
+    last = st.session_state.get("last_clinic", clinic_names[0])
     default_idx = clinic_names.index(last) if last in clinic_names else 0
+    poli = st.selectbox("Poliambulatorio *", clinic_names, index=default_idx, key="poli_select")
 
     with st.form("form_visita", clear_on_submit=True):
         col1, col2 = st.columns(2)
 
         with col1:
-            poli = st.selectbox("Poliambulatorio *", clinic_names, index=default_idx)
             data_visita = st.date_input("Data *", value=date.today())
             nome = st.text_input("Nome paziente")
             cognome = st.text_input("Cognome paziente *")
