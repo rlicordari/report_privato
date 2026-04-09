@@ -648,6 +648,68 @@ def page_report_globale():
             + ", ".join(clinics_con_ritenuta) + "."
         )
 
+    # ── Andamento globale nel tempo
+    st.divider()
+    st.markdown("#### 📈 Andamento globale nel tempo")
+
+    mesi_range = st.radio(
+        "Periodo di analisi",
+        [3, 6, 12],
+        format_func=lambda x: f"{x} mesi",
+        horizontal=True,
+        key="global_trend_range",
+    )
+
+    # Periodi a ritroso dal mese selezionato
+    periods = []
+    for i in range(mesi_range - 1, -1, -1):
+        m = month - i
+        y = year
+        while m <= 0:
+            m += 12
+            y -= 1
+        periods.append((y, m))
+
+    trend_rows = []
+    for (y, m) in periods:
+        mask_t = (df["data"].dt.year == y) & (df["data"].dt.month == m)
+        sub    = df[mask_t]
+        totale_mese = 0.0
+        for clinic in clinics:
+            name     = clinic["name"]
+            my_pct_c = 100 - clinic["retention_pct"]
+            csub     = sub[sub["poliambulatorio"] == name]
+            my_p     = float(csub["pagato_pos"].sum())  * (my_pct_c / 100)
+            my_c     = float(csub["pagato_cash"].sum()) * (my_pct_c / 100)
+            if ritenuta_map.get(name, False):
+                my_p = my_p * 0.80
+            totale_mese += my_p + my_c
+        trend_rows.append({
+            "Mese":   pd.Timestamp(year=y, month=m, day=1),
+            "Totale": round(totale_mese, 2),
+        })
+
+    trend_df = pd.DataFrame(trend_rows).set_index("Mese").sort_index()
+    st.line_chart(trend_df)
+
+    def _pct(first, last):
+        return (last - first) / first * 100 if first != 0 else None
+
+    def _fmt(val):
+        if val is None:
+            return "n/d"
+        return f"{'+'if val >= 0 else ''}{val:.1f}%"
+
+    first_tot = trend_rows[0]["Totale"]
+    last_tot  = trend_rows[-1]["Totale"]
+    label_from = f"{MONTHS_IT[periods[0][1] - 1][:3]} {periods[0][0]}"
+    label_to   = f"{MONTHS_IT[periods[-1][1] - 1][:3]} {periods[-1][0]}"
+
+    st.caption(f"Variazione **{label_from} → {label_to}**")
+    mc1, mc2 = st.columns(2)
+    mc1.metric("Totale ultimo mese", f"€ {last_tot:.2f}", _fmt(_pct(first_tot, last_tot)))
+    mc2.metric("Totale primo mese",  f"€ {first_tot:.2f}")
+
 
 # ─── PAGE: RICERCA PAZIENTE ──────────────────────────────────────────────────
 
