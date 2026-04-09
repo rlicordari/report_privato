@@ -340,13 +340,13 @@ def page_report():
         if ha_ritenuta:
             my_p = my_p * 0.80
         trend_rows.append({
-            "Mese":   f"{MONTHS_IT[m - 1][:3]} {y}",
+            "Mese":   pd.Timestamp(year=y, month=m, day=1),
             "POS":    round(my_p, 2),
             "CASH":   round(my_c, 2),
             "Totale": round(my_p + my_c, 2),
         })
 
-    trend_df = pd.DataFrame(trend_rows).set_index("Mese")
+    trend_df = pd.DataFrame(trend_rows).set_index("Mese").sort_index()
     st.line_chart(trend_df)
 
     # Variazione percentuale primo → ultimo mese del periodo
