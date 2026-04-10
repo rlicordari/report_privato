@@ -102,6 +102,14 @@ def get_invoices() -> pd.DataFrame:
 def _clear_cache():
     st.cache_data.clear()
 
+
+def _safe_bool(val) -> bool:
+    """Converte in bool gestendo celle vuote (NaN) nel CSV."""
+    try:
+        return bool(val) if pd.notna(val) else False
+    except Exception:
+        return False
+
 # ─── PAGE: NUOVA VISITA ───────────────────────────────────────────────────────
 
 def page_nuova_visita():
@@ -243,16 +251,34 @@ def page_report():
             col_d.write(f"€ {float(row['pagato_pos']):.2f}")
             col_e.write(f"€ {float(row['pagato_cash']):.2f}")
             if col_del.button("🗑️", key=f"del_{idx}", help="Elimina visita"):
+                st.session_state.pending_delete = idx
+                st.rerun()
+
+        # Conferma eliminazione
+        pending = st.session_state.get("pending_delete")
+        if pending is not None and pending in filtered.index:
+            pending_row = filtered.loc[pending]
+            nome_p = f"{pending_row['nome']} {pending_row['cognome']}".strip()
+            st.warning(
+                f"Eliminare la visita di **{nome_p}** del "
+                f"{pending_row['data'].strftime('%d/%m/%Y')}?"
+            )
+            c_si, c_no = st.columns(2)
+            if c_si.button("✅ Sì, elimina", type="primary"):
                 full_df = get_visits()
                 full_df["data"] = pd.to_datetime(full_df["data"], errors="coerce")
-                full_df = full_df.drop(index=idx).reset_index(drop=True)
+                full_df = full_df.drop(index=pending).reset_index(drop=True)
                 full_df["data"] = full_df["data"].dt.strftime("%Y-%m-%d")
                 gh_write(
                     VISITS_FILE,
                     full_df.to_csv(index=False),
-                    msg=f"Elimina visita: {row['cognome']} {row['nome']} @ {poli} ({row['data'].date()})",
+                    msg=f"Elimina visita: {pending_row['cognome']} {pending_row['nome']} @ {poli} ({pending_row['data'].date()})",
                 )
+                st.session_state.pending_delete = None
                 _clear_cache()
+                st.rerun()
+            if c_no.button("❌ Annulla"):
+                st.session_state.pending_delete = None
                 st.rerun()
     else:
         st.info(f"Nessuna visita registrata per **{poli}** nel mese di **{month_name} {year}**.")
@@ -269,8 +295,8 @@ def page_report():
     )
     existing = inv_df[inv_mask]
 
-    fat_emessa = bool(existing.iloc[0]["fattura_emessa"]) if not existing.empty else False
-    fat_pagata = bool(existing.iloc[0]["fattura_pagata"]) if not existing.empty else False
+    fat_emessa = _safe_bool(existing.iloc[0]["fattura_emessa"]) if not existing.empty else False
+    fat_pagata = _safe_bool(existing.iloc[0]["fattura_pagata"]) if not existing.empty else False
 
     col_a, col_b = st.columns(2)
     with col_a:
@@ -721,22 +747,25 @@ def page_ricerca():
         st.info("Nessun dato disponibile.")
         return
 
-    cognome_query = st.text_input("Cerca per cognome", placeholder="es. Rossi").strip()
+    query = st.text_input("Cerca per nome o cognome", placeholder="es. Rossi").strip()
 
-    if not cognome_query:
+    if not query:
         return
 
     df["data"] = pd.to_datetime(df["data"], errors="coerce")
     df = df.dropna(subset=["data"])
 
-    mask    = df["cognome"].str.contains(cognome_query, case=False, na=False)
+    mask = (
+        df["cognome"].str.contains(query, case=False, na=False) |
+        df["nome"].str.contains(query, case=False, na=False)
+    )
     results = df[mask].copy()
 
     if results.empty:
-        st.warning(f"Nessun paziente trovato con cognome **{cognome_query}**.")
+        st.warning(f"Nessun paziente trovato per **{query}**.")
         return
 
-    st.success(f"Trovati **{len(results)}** risultati per «{cognome_query}»")
+    st.success(f"Trovati **{len(results)}** risultati per «{query}»")
 
     display = results[["data", "nome", "cognome", "poliambulatorio", "pagato_pos", "pagato_cash"]].copy()
     display["data"]   = display["data"].dt.strftime("%d/%m/%Y")
