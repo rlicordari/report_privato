@@ -811,43 +811,48 @@ def main():
             try {
                 var p = window.parent;
                 var doc = p.document;
-                if (!p.matchMedia('(max-width: 1024px)').matches) return;
 
-                function isSidebarOpen() {
-                    var sb = doc.querySelector('[data-testid="stSidebar"]');
-                    if (!sb) return false;
-                    return sb.getBoundingClientRect().right > 20;
+                function showDebug(msg) {
+                    var existing = doc.getElementById('_sb_debug');
+                    if (existing) existing.remove();
+                    var d = doc.createElement('div');
+                    d.id = '_sb_debug';
+                    d.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;background:#222;color:#fff;padding:10px;border-radius:8px;font-size:13px;z-index:99999;font-family:monospace;white-space:pre-wrap;';
+                    d.textContent = msg;
+                    var close = doc.createElement('button');
+                    close.textContent = '✕';
+                    close.style.cssText = 'float:right;background:none;border:none;color:#fff;font-size:16px;cursor:pointer;';
+                    close.onclick = function(){ d.remove(); };
+                    d.prepend(close);
+                    doc.body.appendChild(d);
+                    setTimeout(function(){ if(d.parentNode) d.remove(); }, 15000);
                 }
 
-                function tryClose() {
-                    if (!isSidebarOpen()) return;
+                setTimeout(function() {
+                    var info = [];
+                    info.push('parent accessibile: ' + (!!doc.body));
+                    info.push('stSidebar: ' + (!!doc.querySelector('[data-testid="stSidebar"]')));
+                    info.push('stSidebarCollapseButton: ' + (!!doc.querySelector('[data-testid="stSidebarCollapseButton"]')));
+                    info.push('collapsedControl: ' + (!!doc.querySelector('[data-testid="collapsedControl"]')));
+                    info.push('stSidebarNavButton: ' + (!!doc.querySelector('[data-testid="stSidebarNavButton"]')));
 
-                    // Streamlit >= 1.28: pulsante di chiusura DENTRO il sidebar
-                    var btn = doc.querySelector('[data-testid="stSidebarCollapseButton"]');
-                    if (btn) { btn.click(); return; }
-
-                    // Streamlit < 1.28: pulsante toggle nel layout principale
-                    btn = doc.querySelector('[data-testid="collapsedControl"]');
-                    if (btn) { btn.click(); return; }
-
-                    // Fallback: click fuori dal sidebar (a destra del suo bordo destro)
                     var sb = doc.querySelector('[data-testid="stSidebar"]');
-                    if (!sb) return;
-                    var r = sb.getBoundingClientRect();
-                    var x = Math.min(r.right + 80, p.innerWidth - 10);
-                    var y = Math.floor(p.innerHeight / 2);
-                    var el = doc.elementFromPoint(x, y);
-                    if (el) {
-                        el.dispatchEvent(new MouseEvent('mousedown', {bubbles:true, cancelable:true, clientX:x, clientY:y}));
-                        el.dispatchEvent(new MouseEvent('click',     {bubbles:true, cancelable:true, clientX:x, clientY:y}));
+                    if (sb) {
+                        var btns = sb.querySelectorAll('button');
+                        var btnInfo = [];
+                        for (var i = 0; i < btns.length; i++) {
+                            btnInfo.push(btns[i].getAttribute('data-testid') || btns[i].getAttribute('aria-label') || '(nessun id)');
+                        }
+                        info.push('bottoni nel sidebar: [' + btnInfo.join(', ') + ']');
+                        info.push('sidebar.right: ' + Math.round(sb.getBoundingClientRect().right));
                     }
-                }
+                    showDebug(info.join('\n'));
+                }, 300);
 
-                // Tre tentativi con ritardi crescenti per dare tempo a Streamlit di renderizzare
-                setTimeout(tryClose, 150);
-                setTimeout(tryClose, 500);
-                setTimeout(tryClose, 1000);
-            } catch(e) {}
+            } catch(e) {
+                // Non possiamo accedere al parent - cross-origin
+                // Non possiamo mostrare nulla
+            }
         })();
         </script>
         """, height=0)
