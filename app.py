@@ -801,61 +801,47 @@ def main():
             st.session_state.authenticated = False
             st.rerun()
 
-    # Su mobile, chiude il sidebar automaticamente dopo aver selezionato una voce.
-    # Usa il selettore corretto per Streamlit moderno (stSidebarCollapseButton).
-    if st.session_state.get("_nav_page") != page:
-        st.session_state["_nav_page"] = page
-        components.html("""
-        <script>
-        (function() {
-            try {
-                var p = window.parent;
-                var doc = p.document;
+    # Listener persistente sul sidebar: chiude automaticamente quando si clicca
+    # una voce radio (label/input). Ignora i <button> per evitare il bug "si riapre".
+    components.html("""
+    <script>
+    (function() {
+        try {
+            var p = window.parent;
+            if (p._sbDone) return;
+            p._sbDone = true;
+            var doc = p.document;
 
-                function showDebug(msg) {
-                    var existing = doc.getElementById('_sb_debug');
-                    if (existing) existing.remove();
-                    var d = doc.createElement('div');
-                    d.id = '_sb_debug';
-                    d.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;background:#222;color:#fff;padding:10px;border-radius:8px;font-size:13px;z-index:99999;font-family:monospace;white-space:pre-wrap;';
-                    d.textContent = msg;
-                    var close = doc.createElement('button');
-                    close.textContent = '✕';
-                    close.style.cssText = 'float:right;background:none;border:none;color:#fff;font-size:16px;cursor:pointer;';
-                    close.onclick = function(){ d.remove(); };
-                    d.prepend(close);
-                    doc.body.appendChild(d);
-                    setTimeout(function(){ if(d.parentNode) d.remove(); }, 15000);
-                }
-
-                setTimeout(function() {
-                    var info = [];
-                    info.push('parent accessibile: ' + (!!doc.body));
-                    info.push('stSidebar: ' + (!!doc.querySelector('[data-testid="stSidebar"]')));
-                    info.push('stSidebarCollapseButton: ' + (!!doc.querySelector('[data-testid="stSidebarCollapseButton"]')));
-                    info.push('collapsedControl: ' + (!!doc.querySelector('[data-testid="collapsedControl"]')));
-                    info.push('stSidebarNavButton: ' + (!!doc.querySelector('[data-testid="stSidebarNavButton"]')));
-
-                    var sb = doc.querySelector('[data-testid="stSidebar"]');
-                    if (sb) {
-                        var btns = sb.querySelectorAll('button');
-                        var btnInfo = [];
-                        for (var i = 0; i < btns.length; i++) {
-                            btnInfo.push(btns[i].getAttribute('data-testid') || btns[i].getAttribute('aria-label') || '(nessun id)');
-                        }
-                        info.push('bottoni nel sidebar: [' + btnInfo.join(', ') + ']');
-                        info.push('sidebar.right: ' + Math.round(sb.getBoundingClientRect().right));
-                    }
-                    showDebug(info.join('\n'));
-                }, 300);
-
-            } catch(e) {
-                // Non possiamo accedere al parent - cross-origin
-                // Non possiamo mostrare nulla
+            function closeSidebar() {
+                var btn = doc.querySelector('[data-testid="collapsedControl"]');
+                if (btn) { btn.click(); return; }
+                btn = doc.querySelector('[data-testid="stSidebarCollapseButton"]');
+                if (btn) { btn.click(); }
             }
-        })();
-        </script>
-        """, height=0)
+
+            function attach(sb) {
+                if (sb._l) return;
+                sb._l = true;
+                sb.addEventListener('click', function(e) {
+                    // Le voci radio sono <label>/<input>, non <button>.
+                    // Ignora click su <button> (chiudi manuale, Esci) per evitare il reopen bug.
+                    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                    setTimeout(closeSidebar, 300);
+                });
+            }
+
+            new MutationObserver(function() {
+                var s = doc.querySelector('[data-testid="stSidebar"]');
+                if (s) attach(s);
+            }).observe(doc.body, {childList: true, subtree: true});
+
+            var s = doc.querySelector('[data-testid="stSidebar"]');
+            if (s) attach(s);
+
+        } catch(e) {}
+    })();
+    </script>
+    """, height=0)
 
     if page == "➕ Nuova Visita":
         page_nuova_visita()
