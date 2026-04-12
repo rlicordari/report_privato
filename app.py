@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import json
 import io
@@ -7,15 +8,10 @@ from github import Github, GithubException
 
 # ─── CONFIG ──────────────────────────────────────────────────────────────────
 
-_sidebar_state = "collapsed" if st.session_state.get("_collapse_sidebar") else "auto"
-if st.session_state.get("_collapse_sidebar"):
-    st.session_state["_collapse_sidebar"] = False
-
 st.set_page_config(
     page_title="Attività Privata",
     page_icon="🏥",
     layout="wide",
-    initial_sidebar_state=_sidebar_state,
 )
 
 VISITS_FILE   = "data/visits.csv"
@@ -805,12 +801,56 @@ def main():
             st.session_state.authenticated = False
             st.rerun()
 
-    # Chiudi il sidebar dopo navigazione: imposta il flag e forza un rerun,
-    # così set_page_config viene richiamato con initial_sidebar_state="collapsed".
+    # Su mobile, chiude il sidebar automaticamente dopo aver selezionato una voce.
+    # Usa il selettore corretto per Streamlit moderno (stSidebarCollapseButton).
     if st.session_state.get("_nav_page") != page:
         st.session_state["_nav_page"] = page
-        st.session_state["_collapse_sidebar"] = True
-        st.rerun()
+        components.html("""
+        <script>
+        (function() {
+            try {
+                var p = window.parent;
+                var doc = p.document;
+                if (!p.matchMedia('(max-width: 1024px)').matches) return;
+
+                function isSidebarOpen() {
+                    var sb = doc.querySelector('[data-testid="stSidebar"]');
+                    if (!sb) return false;
+                    return sb.getBoundingClientRect().right > 20;
+                }
+
+                function tryClose() {
+                    if (!isSidebarOpen()) return;
+
+                    // Streamlit >= 1.28: pulsante di chiusura DENTRO il sidebar
+                    var btn = doc.querySelector('[data-testid="stSidebarCollapseButton"]');
+                    if (btn) { btn.click(); return; }
+
+                    // Streamlit < 1.28: pulsante toggle nel layout principale
+                    btn = doc.querySelector('[data-testid="collapsedControl"]');
+                    if (btn) { btn.click(); return; }
+
+                    // Fallback: click fuori dal sidebar (a destra del suo bordo destro)
+                    var sb = doc.querySelector('[data-testid="stSidebar"]');
+                    if (!sb) return;
+                    var r = sb.getBoundingClientRect();
+                    var x = Math.min(r.right + 80, p.innerWidth - 10);
+                    var y = Math.floor(p.innerHeight / 2);
+                    var el = doc.elementFromPoint(x, y);
+                    if (el) {
+                        el.dispatchEvent(new MouseEvent('mousedown', {bubbles:true, cancelable:true, clientX:x, clientY:y}));
+                        el.dispatchEvent(new MouseEvent('click',     {bubbles:true, cancelable:true, clientX:x, clientY:y}));
+                    }
+                }
+
+                // Tre tentativi con ritardi crescenti per dare tempo a Streamlit di renderizzare
+                setTimeout(tryClose, 150);
+                setTimeout(tryClose, 500);
+                setTimeout(tryClose, 1000);
+            } catch(e) {}
+        })();
+        </script>
+        """, height=0)
 
     if page == "➕ Nuova Visita":
         page_nuova_visita()
