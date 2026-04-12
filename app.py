@@ -801,59 +801,60 @@ def main():
             st.session_state.authenticated = False
             st.rerun()
 
-    # Su mobile, chiudi il sidebar automaticamente dopo aver selezionato una voce.
-    # Usa un listener persistente (flag su window.parent) per evitare duplicati.
-    components.html("""
-    <script>
-    (function() {
-        try {
-            var p = window.parent;
-            if (p._sbAutoClose) return;  // già impostato, esci
-            p._sbAutoClose = true;
+    # Su mobile, chiudi il sidebar dopo navigazione.
+    # Si attiva solo quando la pagina cambia davvero, e verifica che il sidebar sia aperto
+    # prima di agire (evita il bug "si riapre da solo").
+    if st.session_state.get("_nav_page") != page:
+        st.session_state["_nav_page"] = page
+        components.html("""
+        <script>
+        (function() {
+            try {
+                var p = window.parent;
+                if (!p.matchMedia('(max-width: 1024px)').matches) return;
+                var doc = p.document;
 
-            var doc = p.document;
-
-            function closeSidebar() {
-                if (!p.matchMedia('(max-width: 992px)').matches) return;
-
-                // Strategia 1: selettore noto
-                var btn = doc.querySelector('[data-testid="collapsedControl"]');
-                if (btn) { btn.click(); return; }
-
-                // Strategia 2: pulsante in posizione top-left (indipendente dalla versione)
-                var btns = doc.querySelectorAll('button');
-                for (var i = 0; i < btns.length; i++) {
-                    var r = btns[i].getBoundingClientRect();
-                    if (r.top < 80 && r.left < 100 && r.width > 0) { btns[i].click(); return; }
+                function isSidebarOpen() {
+                    var sb = doc.querySelector('[data-testid="stSidebar"]');
+                    if (!sb) return false;
+                    // Se il sidebar è off-screen (chiuso), il suo right sarà <= 0
+                    return sb.getBoundingClientRect().right > 20;
                 }
 
-                // Strategia 3: click sull'area principale (simula tap fuori dal sidebar)
-                var main = doc.querySelector('[data-testid="stAppViewContainer"]');
-                if (main) main.dispatchEvent(new MouseEvent('click', {bubbles: true}));
-            }
+                function tryClose() {
+                    if (!isSidebarOpen()) return;
 
-            function attachListener(sidebar) {
-                if (sidebar._sbListener) return;
-                sidebar._sbListener = true;
-                sidebar.addEventListener('click', function() {
-                    setTimeout(closeSidebar, 400);
-                    setTimeout(closeSidebar, 900);
-                });
-            }
+                    // Pulsante toggle (varie versioni di Streamlit)
+                    var sels = [
+                        '[data-testid="collapsedControl"]',
+                        '[data-testid="stSidebarCollapseButton"]',
+                        'button[aria-label="Close sidebar"]',
+                    ];
+                    for (var i = 0; i < sels.length; i++) {
+                        var btn = doc.querySelector(sels[i]);
+                        if (btn) { btn.click(); return; }
+                    }
 
-            // Collega il listener e ri-collegalo dopo ogni rerender di Streamlit
-            new MutationObserver(function() {
-                var s = doc.querySelector('[data-testid="stSidebar"]');
-                if (s) attachListener(s);
-            }).observe(doc.body, {childList: true, subtree: true});
+                    // Fallback: simula tap sull'area a destra del sidebar
+                    var sb = doc.querySelector('[data-testid="stSidebar"]');
+                    var x = sb ? Math.min(sb.getBoundingClientRect().right + 50, p.innerWidth - 10)
+                                : p.innerWidth - 10;
+                    var y = p.innerHeight / 2;
+                    var el = doc.elementFromPoint(x, y);
+                    if (el) {
+                        el.dispatchEvent(new MouseEvent('mousedown', {bubbles:true, cancelable:true, clientX:x, clientY:y}));
+                        el.dispatchEvent(new MouseEvent('click',     {bubbles:true, cancelable:true, clientX:x, clientY:y}));
+                    }
+                }
 
-            var s = doc.querySelector('[data-testid="stSidebar"]');
-            if (s) attachListener(s);
+                setTimeout(tryClose, 200);
+                setTimeout(tryClose, 600);
+                setTimeout(tryClose, 1200);
 
-        } catch(e) {}
-    })();
-    </script>
-    """, height=0)
+            } catch(e) {}
+        })();
+        </script>
+        """, height=0)
 
     if page == "➕ Nuova Visita":
         page_nuova_visita()
