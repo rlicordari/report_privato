@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import json
 import io
@@ -799,6 +800,30 @@ def main():
         if st.button("🚪 Esci", use_container_width=True):
             st.session_state.authenticated = False
             st.rerun()
+
+    # Su mobile, chiudi il sidebar automaticamente dopo aver selezionato una voce
+    if st.session_state.get("_nav_page") != page:
+        st.session_state["_nav_page"] = page
+        components.html("""
+        <script>
+        (function() {
+            var parent = window.parent;
+            if (!parent || !parent.matchMedia('(max-width: 768px)').matches) return;
+            setTimeout(function() {
+                var selectors = [
+                    '[data-testid="collapsedControl"]',
+                    '[data-testid="stSidebar"] button[kind="headerNoPadding"]',
+                    'button[aria-label="Close sidebar"]',
+                    '[data-testid="stSidebarContent"] ~ button',
+                ];
+                for (var i = 0; i < selectors.length; i++) {
+                    var btn = parent.document.querySelector(selectors[i]);
+                    if (btn) { btn.click(); break; }
+                }
+            }, 150);
+        })();
+        </script>
+        """, height=0, width=0)
 
     if page == "➕ Nuova Visita":
         page_nuova_visita()
