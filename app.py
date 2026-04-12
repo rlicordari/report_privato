@@ -801,29 +801,59 @@ def main():
             st.session_state.authenticated = False
             st.rerun()
 
-    # Su mobile, chiudi il sidebar automaticamente dopo aver selezionato una voce
-    if st.session_state.get("_nav_page") != page:
-        st.session_state["_nav_page"] = page
-        components.html("""
-        <script>
-        (function() {
-            var parent = window.parent;
-            if (!parent || !parent.matchMedia('(max-width: 768px)').matches) return;
-            setTimeout(function() {
-                var selectors = [
-                    '[data-testid="collapsedControl"]',
-                    '[data-testid="stSidebar"] button[kind="headerNoPadding"]',
-                    'button[aria-label="Close sidebar"]',
-                    '[data-testid="stSidebarContent"] ~ button',
-                ];
-                for (var i = 0; i < selectors.length; i++) {
-                    var btn = parent.document.querySelector(selectors[i]);
-                    if (btn) { btn.click(); break; }
+    # Su mobile, chiudi il sidebar automaticamente dopo aver selezionato una voce.
+    # Usa un listener persistente (flag su window.parent) per evitare duplicati.
+    components.html("""
+    <script>
+    (function() {
+        try {
+            var p = window.parent;
+            if (p._sbAutoClose) return;  // già impostato, esci
+            p._sbAutoClose = true;
+
+            var doc = p.document;
+
+            function closeSidebar() {
+                if (!p.matchMedia('(max-width: 992px)').matches) return;
+
+                // Strategia 1: selettore noto
+                var btn = doc.querySelector('[data-testid="collapsedControl"]');
+                if (btn) { btn.click(); return; }
+
+                // Strategia 2: pulsante in posizione top-left (indipendente dalla versione)
+                var btns = doc.querySelectorAll('button');
+                for (var i = 0; i < btns.length; i++) {
+                    var r = btns[i].getBoundingClientRect();
+                    if (r.top < 80 && r.left < 100 && r.width > 0) { btns[i].click(); return; }
                 }
-            }, 150);
-        })();
-        </script>
-        """, height=0, width=0)
+
+                // Strategia 3: click sull'area principale (simula tap fuori dal sidebar)
+                var main = doc.querySelector('[data-testid="stAppViewContainer"]');
+                if (main) main.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+            }
+
+            function attachListener(sidebar) {
+                if (sidebar._sbListener) return;
+                sidebar._sbListener = true;
+                sidebar.addEventListener('click', function() {
+                    setTimeout(closeSidebar, 400);
+                    setTimeout(closeSidebar, 900);
+                });
+            }
+
+            // Collega il listener e ri-collegalo dopo ogni rerender di Streamlit
+            new MutationObserver(function() {
+                var s = doc.querySelector('[data-testid="stSidebar"]');
+                if (s) attachListener(s);
+            }).observe(doc.body, {childList: true, subtree: true});
+
+            var s = doc.querySelector('[data-testid="stSidebar"]');
+            if (s) attachListener(s);
+
+        } catch(e) {}
+    })();
+    </script>
+    """, height=0)
 
     if page == "➕ Nuova Visita":
         page_nuova_visita()
