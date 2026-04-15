@@ -82,6 +82,6 @@
   {
     "name": "Patti",
     "retention_pct": 20,
-    "ritenuta_acconto": false
+    "ritenuta_acconto": true
   }
 ]
