@@ -801,47 +801,19 @@ def main():
             st.session_state.authenticated = False
             st.rerun()
 
-    # Listener persistente sul sidebar: chiude automaticamente quando si clicca
-    # una voce radio (label/input). Ignora i <button> per evitare il bug "si riapre".
-    components.html("""
-    <script>
-    (function() {
+    # Chiude la sidebar una-tantum quando l'utente cambia pagina (non ad ogni rerun).
+    # Nessun listener persistente → nessuna interferenza con i selectbox.
+    _prev = st.session_state.get("_prev_page")
+    if _prev is not None and _prev != page:
+        components.html("""<script>
         try {
-            var p = window.parent;
-            if (p._sbDone) return;
-            p._sbDone = true;
-            var doc = p.document;
-
-            function closeSidebar() {
-                var btn = doc.querySelector('[data-testid="collapsedControl"]');
-                if (btn) { btn.click(); return; }
-                btn = doc.querySelector('[data-testid="stSidebarCollapseButton"]');
-                if (btn) { btn.click(); }
-            }
-
-            function attach(sb) {
-                if (sb._l) return;
-                sb._l = true;
-                sb.addEventListener('click', function(e) {
-                    // Le voci radio sono <label>/<input>, non <button>.
-                    // Ignora click su <button> (chiudi manuale, Esci) per evitare il reopen bug.
-                    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-                    setTimeout(closeSidebar, 300);
-                });
-            }
-
-            new MutationObserver(function() {
-                var s = doc.querySelector('[data-testid="stSidebar"]');
-                if (s) attach(s);
-            }).observe(doc.body, {childList: true, subtree: true});
-
-            var s = doc.querySelector('[data-testid="stSidebar"]');
-            if (s) attach(s);
-
+            var d = window.parent.document;
+            var btn = d.querySelector('[data-testid="collapsedControl"]') ||
+                      d.querySelector('[data-testid="stSidebarCollapseButton"]');
+            if (btn) setTimeout(function(){ btn.click(); }, 300);
         } catch(e) {}
-    })();
-    </script>
-    """, height=0)
+        </script>""", height=0)
+    st.session_state._prev_page = page
 
     if page == "➕ Nuova Visita":
         page_nuova_visita()
