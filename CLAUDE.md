@@ -45,3 +45,36 @@ my_pos  = my_pos * 0.80
 ```
 
 **`_render_sticky_table`** renders the global report as raw HTML/CSS injected via `st.markdown(..., unsafe_allow_html=True)` to support sticky first column + header and dark/light theme compatibility.
+
+## Work in progress / known issues
+
+### Sidebar auto-close — DA RISOLVERE
+La sidebar deve chiudersi automaticamente quando l'utente clicca una voce del menu di navigazione (radio button).
+
+**Storico tentativi:**
+- Tentativo 1: JS con `MutationObserver` su `document.body` + click listener persistente sul sidebar → **rotto**: interferiva con tutti i `st.selectbox` dell'app, i dropdown si chiudevano immediatamente all'apertura.
+- Tentativo 2 (commit `f28fce5`): JS one-shot iniettato via `components.html` solo al cambio pagina (confronto `_prev_page` in session_state) → **parzialmente rotto**: i dropdown ora funzionano, ma la sidebar non si chiude.
+
+**Vincolo critico:** qualsiasi soluzione NON deve interferire con i `st.selectbox` / dropdown di Streamlit. Il vecchio approccio con listener persistenti o MutationObserver su body rompe i menu a tendina.
+
+**Stato attuale del codice** (righe ~804-820 in `main()`):
+```python
+_prev = st.session_state.get("_prev_page")
+if _prev is not None and _prev != page:
+    components.html("""<script>
+    try {
+        var d = window.parent.document;
+        var btn = d.querySelector('[data-testid="collapsedControl"]') ||
+                  d.querySelector('[data-testid="stSidebarCollapseButton"]');
+        if (btn) setTimeout(function(){ btn.click(); }, 300);
+    } catch(e) {}
+    </script>""", height=0)
+st.session_state._prev_page = page
+```
+
+**Ipotesi sul problema attuale:** `components.html` con `height=0` in Streamlit potrebbe non eseguire lo script affidabilmente, oppure i `data-testid` del pulsante di collasso sono cambiati nell'ultima versione di Streamlit. Da verificare i testid corretti nel DOM live.
+
+### Criticità minori già identificate (NON prioritarie, da non toccare)
+- `page_ricerca`: sort per data fatto su stringa `dd/mm/yyyy` invece che su datetime → ordine sbagliato (riga 772-773)
+- `page_report_globale`: usa `bool()` grezzo invece di `_safe_bool()` per i campi fattura (righe 623-624) → può crashare su NaN
+- Dark mode tabella HTML (`_render_sticky_table`): CSS usa `prefers-color-scheme` (OS) invece del tema Streamlit → colori sbagliati se OS e Streamlit non sono allineati
