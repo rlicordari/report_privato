@@ -83,5 +83,10 @@
     "name": "Patti",
     "retention_pct": 20,
     "ritenuta_acconto": true
+  },
+  {
+    "name": "Rosarno",
+    "retention_pct": 30,
+    "ritenuta_acconto": true
   }
 ]
