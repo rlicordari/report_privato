@@ -334,6 +334,63 @@ def page_report():
         st.success("Stato fattura aggiornato!")
         st.rerun()
 
+    # ── Riepilogo annuale
+    st.divider()
+    st.markdown(f"#### 📅 Riepilogo {year} — tutti i mesi")
+
+    ha_ritenuta = next((c.get("ritenuta_acconto", False) for c in clinics if c["name"] == poli), False)
+
+    annual_rows = []
+    df_poli_year = df[(df["data"].dt.year == year) & (df["poliambulatorio"] == poli)]
+
+    for m_idx in range(1, 13):
+        sub      = df_poli_year[df_poli_year["data"].dt.month == m_idx]
+        n        = len(sub)
+        tot_pos  = float(sub["pagato_pos"].sum())
+        tot_cash = float(sub["pagato_cash"].sum())
+        my_p     = tot_pos  * (my_pct / 100)
+        my_c     = tot_cash * (my_pct / 100)
+        if ha_ritenuta:
+            my_p = my_p * 0.80
+
+        inv_mask_m  = (
+            (inv_df["anno"].astype(int) == year) &
+            (inv_df["mese"].astype(int) == m_idx) &
+            (inv_df["poliambulatorio"] == poli)
+        )
+        inv_row_m    = inv_df[inv_mask_m]
+        fat_emessa_m = _safe_bool(inv_row_m.iloc[0]["fattura_emessa"]) if not inv_row_m.empty else False
+        fat_pagata_m = _safe_bool(inv_row_m.iloc[0]["fattura_pagata"]) if not inv_row_m.empty else False
+
+        if n == 0 and not fat_emessa_m and not fat_pagata_m:
+            continue
+
+        annual_rows.append({
+            "Mese":           MONTHS_IT[m_idx - 1],
+            "Visite":         n,
+            "POS (€)":        round(my_p, 2),
+            "CASH (€)":       round(my_c, 2),
+            "Totale (€)":     round(my_p + my_c, 2),
+            "Fattura emessa": "✅" if fat_emessa_m else "❌",
+            "Pagato":         "✅" if fat_pagata_m else "❌",
+        })
+
+    if annual_rows:
+        st.dataframe(pd.DataFrame(annual_rows), use_container_width=True, hide_index=True)
+        tot_v  = sum(r["Visite"]     for r in annual_rows)
+        tot_p  = sum(r["POS (€)"]    for r in annual_rows)
+        tot_c  = sum(r["CASH (€)"]   for r in annual_rows)
+        tot_t  = sum(r["Totale (€)"] for r in annual_rows)
+        ca, cb, cc, cd = st.columns(4)
+        ca.metric("Visite totali",  tot_v)
+        cb.metric("Totale POS",     f"€ {tot_p:.2f}")
+        cc.metric("Totale CASH",    f"€ {tot_c:.2f}")
+        cd.metric("Totale anno",    f"€ {tot_t:.2f}")
+        if ha_ritenuta:
+            st.caption("I valori POS includono già la detrazione della ritenuta d'acconto (20%).")
+    else:
+        st.info(f"Nessun dato per **{poli}** nel {year}.")
+
     # ── Andamento nel tempo
     st.divider()
     st.markdown("#### 📈 Andamento nel tempo")
@@ -345,8 +402,6 @@ def page_report():
         horizontal=True,
         key="trend_range",
     )
-
-    ha_ritenuta = next((c.get("ritenuta_acconto", False) for c in clinics if c["name"] == poli), False)
 
     # Costruisce la lista di (anno, mese) a ritroso dal mese selezionato
     periods = []
