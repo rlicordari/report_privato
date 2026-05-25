@@ -188,7 +188,7 @@ def page_report():
     clinic_names = [c["name"] for c in clinics]
     clinic_map   = {c["name"]: c for c in clinics}
 
-  now = datetime.now()
+    now = datetime.now()
 
     col1, col2, col3 = st.columns(3)
     with col1:
