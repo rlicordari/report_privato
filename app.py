@@ -186,9 +186,9 @@ def page_report():
         return
 
     clinic_names = [c["name"] for c in clinics]
-    clinic_map   = {c["name"]: c["retention_pct"] for c in clinics}
+    clinic_map   = {c["name"]: c for c in clinics}
 
-    now = datetime.now()
+  now = datetime.now()
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -214,20 +214,23 @@ def page_report():
     mask     = (df["data"].dt.year == year) & (df["data"].dt.month == month) & (df["poliambulatorio"] == poli)
     filtered = df[mask].copy()
 
-    retention_pct = clinic_map.get(poli, 0)
-    my_pct        = 100 - retention_pct
+    clinic_cfg       = clinic_map.get(poli, {})
+    ret_pos_pct      = clinic_cfg.get("retention_pct_pos",  clinic_cfg.get("retention_pct", 0))
+    ret_cash_pct     = clinic_cfg.get("retention_pct_cash", clinic_cfg.get("retention_pct", 0))
+    my_pct_pos       = 100 - ret_pos_pct
+    my_pct_cash      = 100 - ret_cash_pct
 
     st.markdown(f"### {poli} — {month_name} {year}")
     st.caption(
-        f"Il poliambulatorio trattiene il **{retention_pct}%** | "
-        f"La tua quota è il **{my_pct}%**"
+        f"Trattenuta POS **{ret_pos_pct}%** (tua quota **{my_pct_pos}%**) | "
+        f"Trattenuta CASH **{ret_cash_pct}%** (tua quota **{my_pct_cash}%**)"
     )
 
     n_visits   = len(filtered)
     total_pos  = float(filtered["pagato_pos"].sum())  if not filtered.empty else 0.0
     total_cash = float(filtered["pagato_cash"].sum()) if not filtered.empty else 0.0
-    my_pos     = total_pos  * (my_pct / 100)
-    my_cash    = total_cash * (my_pct / 100)
+    my_pos     = total_pos  * (my_pct_pos  / 100)
+    my_cash    = total_cash * (my_pct_cash / 100)
     total_inv  = my_pos + my_cash
 
     # ── Metriche principali
@@ -238,8 +241,8 @@ def page_report():
     c3.metric("Totale CASH (pazienti)", f"€ {total_cash:.2f}")
 
     c4, c5 = st.columns(2)
-    c4.metric(f"Tua quota POS ({my_pct}%)",  f"€ {my_pos:.2f}")
-    c5.metric(f"Tua quota CASH ({my_pct}%)", f"€ {my_cash:.2f}")
+    c4.metric(f"Tua quota POS ({my_pct_pos}%)",  f"€ {my_pos:.2f}")
+    c5.metric(f"Tua quota CASH ({my_pct_cash}%)", f"€ {my_cash:.2f}")
 
     # ── Dettaglio visite
     if not filtered.empty:
@@ -346,8 +349,8 @@ def page_report():
         n        = len(sub)
         tot_pos  = float(sub["pagato_pos"].sum())
         tot_cash = float(sub["pagato_cash"].sum())
-        my_p     = tot_pos  * (my_pct / 100)
-        my_c     = tot_cash * (my_pct / 100)
+        my_p     = tot_pos  * (my_pct_pos  / 100)
+        my_c     = tot_cash * (my_pct_cash / 100)
 
         inv_mask_m  = (
             (inv_df["anno"].astype(int) == year) &
@@ -407,12 +410,14 @@ def page_report():
             y -= 1
         periods.append((y, m))
 
+    ha_ritenuta = clinic_cfg.get("ritenuta_acconto", False)
+
     trend_rows = []
     for (y, m) in periods:
         mask_t = (df["data"].dt.year == y) & (df["data"].dt.month == m) & (df["poliambulatorio"] == poli)
         sub    = df[mask_t]
-        my_p   = float(sub["pagato_pos"].sum())  * (my_pct / 100)
-        my_c   = float(sub["pagato_cash"].sum()) * (my_pct / 100)
+        my_p   = float(sub["pagato_pos"].sum())  * (my_pct_pos  / 100)
+        my_c   = float(sub["pagato_cash"].sum()) * (my_pct_cash / 100)
         if ha_ritenuta:
             my_p = my_p * 0.80
         trend_rows.append({
@@ -456,10 +461,13 @@ def page_poliambulatori():
     )
 
     clinics = get_clinics()
-    # Compatibilità: aggiungi ritenuta_acconto se mancante nei dati esistenti
+    # Compatibilità: aggiungi campi mancanti nei dati esistenti
     for c in clinics:
         c.setdefault("ritenuta_acconto", False)
-    df = pd.DataFrame(clinics) if clinics else pd.DataFrame(columns=["name", "retention_pct", "ritenuta_acconto"])
+        legacy = c.pop("retention_pct", None)
+        c.setdefault("retention_pct_pos",  legacy if legacy is not None else 0)
+        c.setdefault("retention_pct_cash", legacy if legacy is not None else 0)
+    df = pd.DataFrame(clinics) if clinics else pd.DataFrame(columns=["name", "retention_pct_pos", "retention_pct_cash", "ritenuta_acconto"])
 
     edited = st.data_editor(
         df,
@@ -469,13 +477,21 @@ def page_poliambulatori():
                 required=True,
                 width="large",
             ),
-            "retention_pct": st.column_config.NumberColumn(
-                "Trattenuta (%)",
+            "retention_pct_pos": st.column_config.NumberColumn(
+                "Trattenuta POS (%)",
                 min_value=0,
                 max_value=100,
                 step=1,
                 format="%d",
-                help="% che il poliambulatorio trattiene. Es: 25 → a te resta il 75%.",
+                help="% che il poliambulatorio trattiene sui pagamenti POS.",
+            ),
+            "retention_pct_cash": st.column_config.NumberColumn(
+                "Trattenuta CASH (%)",
+                min_value=0,
+                max_value=100,
+                step=1,
+                format="%d",
+                help="% che il poliambulatorio trattiene sui pagamenti in contanti.",
             ),
             "ritenuta_acconto": st.column_config.CheckboxColumn(
                 "Ritenuta d'Acconto (20%)",
@@ -496,8 +512,9 @@ def page_poliambulatori():
                   .to_dict(orient="records")
         )
         for c in new_clinics:
-            c["retention_pct"]    = int(c.get("retention_pct") or 0)
-            c["ritenuta_acconto"] = bool(c.get("ritenuta_acconto") or False)
+            c["retention_pct_pos"]  = int(c.get("retention_pct_pos")  or 0)
+            c["retention_pct_cash"] = int(c.get("retention_pct_cash") or 0)
+            c["ritenuta_acconto"]   = bool(c.get("ritenuta_acconto") or False)
 
         gh_write(
             CLINICS_FILE,
@@ -620,8 +637,8 @@ def page_report_globale():
         st.error("Nessun poliambulatorio configurato.")
         return
 
-    clinic_map      = {c["name"]: c["retention_pct"]                    for c in clinics}
-    ritenuta_map    = {c["name"]: c.get("ritenuta_acconto", False)       for c in clinics}
+    clinic_map      = {c["name"]: c for c in clinics}
+    ritenuta_map    = {c["name"]: c.get("ritenuta_acconto", False) for c in clinics}
 
     now = datetime.now()
     col1, col2 = st.columns(2)
@@ -647,16 +664,16 @@ def page_report_globale():
 
     rows = []
     for clinic in clinics:
-        name          = clinic["name"]
-        retention_pct = clinic["retention_pct"]
-        my_pct        = 100 - retention_pct
+        name         = clinic["name"]
+        ret_pos_pct  = clinic.get("retention_pct_pos",  clinic.get("retention_pct", 0))
+        ret_cash_pct = clinic.get("retention_pct_cash", clinic.get("retention_pct", 0))
 
         sub       = filtered[filtered["poliambulatorio"] == name]
         n_visite  = len(sub)
         tot_pos   = float(sub["pagato_pos"].sum())
         tot_cash  = float(sub["pagato_cash"].sum())
-        mia_pos   = tot_pos  * (my_pct / 100)
-        mia_cash  = tot_cash * (my_pct / 100)
+        mia_pos   = tot_pos  * ((100 - ret_pos_pct)  / 100)
+        mia_cash  = tot_cash * ((100 - ret_cash_pct) / 100)
 
         # Applica ritenuta d'acconto 20% sulla quota POS se abilitata
         ha_ritenuta = ritenuta_map.get(name, False)
@@ -752,11 +769,12 @@ def page_report_globale():
         sub    = df[mask_t]
         totale_mese = 0.0
         for clinic in clinics:
-            name     = clinic["name"]
-            my_pct_c = 100 - clinic["retention_pct"]
-            csub     = sub[sub["poliambulatorio"] == name]
-            my_p     = float(csub["pagato_pos"].sum())  * (my_pct_c / 100)
-            my_c     = float(csub["pagato_cash"].sum()) * (my_pct_c / 100)
+            name         = clinic["name"]
+            ret_pos_pct  = clinic.get("retention_pct_pos",  clinic.get("retention_pct", 0))
+            ret_cash_pct = clinic.get("retention_pct_cash", clinic.get("retention_pct", 0))
+            csub         = sub[sub["poliambulatorio"] == name]
+            my_p         = float(csub["pagato_pos"].sum())  * ((100 - ret_pos_pct)  / 100)
+            my_c         = float(csub["pagato_cash"].sum()) * ((100 - ret_cash_pct) / 100)
             if ritenuta_map.get(name, False):
                 my_p = my_p * 0.80
             totale_mese += my_p + my_c
