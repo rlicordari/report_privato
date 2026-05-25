@@ -338,8 +338,6 @@ def page_report():
     st.divider()
     st.markdown(f"#### 📅 Riepilogo {year} — tutti i mesi")
 
-    ha_ritenuta = next((c.get("ritenuta_acconto", False) for c in clinics if c["name"] == poli), False)
-
     annual_rows = []
     df_poli_year = df[(df["data"].dt.year == year) & (df["poliambulatorio"] == poli)]
 
@@ -350,8 +348,6 @@ def page_report():
         tot_cash = float(sub["pagato_cash"].sum())
         my_p     = tot_pos  * (my_pct / 100)
         my_c     = tot_cash * (my_pct / 100)
-        if ha_ritenuta:
-            my_p = my_p * 0.80
 
         inv_mask_m  = (
             (inv_df["anno"].astype(int) == year) &
@@ -386,8 +382,6 @@ def page_report():
         cb.metric("Totale POS",     f"€ {tot_p:.2f}")
         cc.metric("Totale CASH",    f"€ {tot_c:.2f}")
         cd.metric("Totale anno",    f"€ {tot_t:.2f}")
-        if ha_ritenuta:
-            st.caption("I valori POS includono già la detrazione della ritenuta d'acconto (20%).")
     else:
         st.info(f"Nessun dato per **{poli}** nel {year}.")
 
