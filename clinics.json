@@ -1,9 +1,9 @@
 [
   {
     "name": "Parisi-Sottile",
-    "retention_pct_pos": 0,
-    "retention_pct_cash": 0,
-    "ritenuta_acconto": false
+    "retention_pct_pos": 30,
+    "retention_pct_cash": 30,
+    "ritenuta_acconto": true
   },
   {
     "name": "Policenter Leonardo",
